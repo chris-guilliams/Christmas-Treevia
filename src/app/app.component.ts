@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import * as p5 from 'p5';
-
+import { SpeechService } from './speech.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -10,7 +10,7 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'Christmas-Treevia';
   private p5;
 
-  constructor() {
+  constructor(public speech: SpeechService) {
     window.onresize = this.onWindowResize;
   }
 
