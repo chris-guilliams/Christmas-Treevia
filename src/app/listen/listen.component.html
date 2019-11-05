@@ -1,21 +1,20 @@
 <div class="alert alert-info mt-3">
-  <h2 class="text-center">Speak to Play</h2>
-  <p>Your browser <a class="alert-link" href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition#Browser_compatibility">supports speech recognition</a>! To play a madlib game using speech, follow these instructions:</p>
+  <h2 class="text-center">Christmas Treevia</h2>
+  <p>Your browser <a class="alert-link" href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition#Browser_compatibility">supports speech recognition</a>! To play a Christmas Treevia game using speech, follow these instructions:</p>
   <ol>
     <li>Click the <em>"Listen"</em> button below.</li>
     <li>If prompted, grant the app permission to use your device's microphone.</li>
     <li>
-      Clearly say a <em>type</em> of word (also known as a "part of speech") followed by <em>one</em> word to fill in the form below. Here are some examples:
+      Listen closely for a Christmas themed question to be asked, once the timer starts you will have 10 seconds to answer.
       <ul>
-        <li><em>"noun <strong>cat</strong>"</em> (person, place, or thing)</li>
-        <li><em>"verb <strong>jumping</strong>"</em> (action, present tense), <em>"verb <strong>ran</strong>"</em> (action, past tense)</li>
-        <li><em>"adjective <strong>flashy</strong>"</em> (describing word)</li>
+        <li>You can answer as many times as you wish within the 10 seconds</li>
+        <li>If you get the question right you will be notified and the next question will be asked</li>
+        <li>If 10 seconds has passed and no suitable answer has been given then the next question will be asked </li>
       </ul>
     </li>
-    <li>Say <em>one command at a time</em>, then wait for the app to assess your speech to fill a madlib field. This could take a few seconds.</li>
-    <li>Repeat until all fields are filled in.</li>
+    <li>It will take a moment for your speech to be processed. The answer you have given will be displayed on the screen so you know if you're being heard right.</li>
   </ol>
-  <p>You may also <em>"Stop"</em> listening at any time and enter (or edit) words manually.</p>
+  <p>You may also <em>"Stop"</em> listening at any time. As well as reset the game.</p>
   <div class="row mb-3">
     <div class="col btn-group">
       <button
@@ -30,6 +29,12 @@
         [disabled]="!speech.listening">
           <img class="icon" src="/assets/images/mic-off.png">Stop
       </button>
+      <button
+      class="btn btn-danger col-6"
+      (click)="speech.abort()"
+      [disabled]="!speech.listening">
+        <img class="icon" src="/assets/images/mic-off.png">Reset
+    </button>
     </div>
   </div>
   <div class="row" *ngIf="errorMsg">

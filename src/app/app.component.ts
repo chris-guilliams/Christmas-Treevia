@@ -1,21 +1,35 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, OnChanges } from '@angular/core';
 import * as p5 from 'p5';
 import { SpeechService } from './speech.service';
+import { Subscription } from 'rxjs';
+import { trimTrailingNulls } from '@angular/compiler/src/render3/view/util';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit, OnDestroy, OnChanges {
   title = 'Christmas-Treevia';
   private p5;
+  spokenWords: Subscription;
+  recievedAnswers: string[] = [];
 
   constructor(public speech: SpeechService) {
     window.onresize = this.onWindowResize;
+    this.speech.words$.subscribe(phrase => {
+      console.log(phrase)
+      if (phrase.type === 'answer') {
+        this.recievedAnswers.push(phrase.answer);
+        console.log(this.recievedAnswers);
+      }
+    });
   }
 
   ngOnInit() {
     this.createCanvas();
+  }
+
+  ngOnChanges() {
   }
 
   ngOnDestroy(): void {

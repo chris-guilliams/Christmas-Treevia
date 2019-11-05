@@ -1,5 +1,8 @@
 <app-listen *ngIf="speech.speechSupported"></app-listen>
 <h1 *ngIf=!speech.speechSupported>Speech recognition is not supported on your device or browser</h1>
+<ul>
+    <li *ngFor="let phrase of recievedAnswers">{{ phrase }}</li>
+</ul>
 <div id="canvas">
 
 </div>

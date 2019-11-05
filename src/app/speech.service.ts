@@ -38,6 +38,11 @@ export class SpeechService {
         this.zone.run(() => {
           this.words$.next({type: 'command', 'word': command});
         });
+      },
+      'the answer is *answer': (answer) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'answer', 'answer': answer});
+        });
       }
     };
     annyang.addCommands(commands);
