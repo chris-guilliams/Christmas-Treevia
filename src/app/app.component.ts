@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, OnChanges } from '@angular/core';
 import * as p5 from 'p5';
 import { SpeechService } from './speech.service';
 import { Subscription } from 'rxjs';
-import { trimTrailingNulls } from '@angular/compiler/src/render3/view/util';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -20,6 +19,8 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
       console.log(phrase)
       if (phrase.type === 'answer') {
         this.recievedAnswers.push(phrase.answer);
+        let msg = new SpeechSynthesisUtterance('You answered: ' + phrase.answer);
+        window.speechSynthesis.speak(msg);
         console.log(this.recievedAnswers);
       }
     });
