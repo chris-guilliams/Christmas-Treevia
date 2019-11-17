@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, OnChanges } from '@angular/core';
 import * as p5 from 'p5';
 import { SpeechService } from './speech.service';
 import { Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -13,7 +14,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
   spokenWords: Subscription;
   recievedAnswers: string[] = [];
 
-  constructor(public speech: SpeechService) {
+  constructor(public speech: SpeechService, private http: HttpClient) {
     window.onresize = this.onWindowResize;
     this.speech.words$.subscribe(phrase => {
       console.log(phrase)
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit() {
     this.createCanvas();
+    console.log(this.http.get('https://us-central1-christmas-treevia.cloudfunctions.net/playTrivia').subscribe());
   }
 
   ngOnChanges() {
