@@ -4,6 +4,7 @@ import { SpeechService } from './speech.service';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Question } from './domain/question';
+import { AngularFirestore } from '@angular/fire/firestore';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -16,7 +17,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
   recievedAnswers: string[] = [];
   questions: Question[];
 
-  constructor(public speech: SpeechService, private http: HttpClient) {
+  constructor(public speech: SpeechService, private http: HttpClient, private db: AngularFirestore) {
     window.onresize = this.onWindowResize;
     this.speech.words$.subscribe(phrase => {
       console.log(phrase);
@@ -27,11 +28,19 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
         console.log(this.recievedAnswers);
       }
     });
+    db.collection('triviaPlays').valueChanges().subscribe((change) => {
+      console.log('The collection was changed', change);
+    });
   }
 
   ngOnInit() {
     this.createCanvas();
-    console.log(this.http.get('https://us-central1-christmas-treevia.cloudfunctions.net/playTrivia').subscribe());
+  }
+
+  startGame() {
+    this.http.post('https://us-central1-christmas-treevia.cloudfunctions.net/playTrivia', {
+      "data": {}
+    }).subscribe();
   }
 
   ngOnChanges() {
