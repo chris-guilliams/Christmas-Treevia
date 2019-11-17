@@ -14,7 +14,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
   private p5;
   spokenWords: Subscription;
   recievedAnswers: string[] = [];
-  questions: Question[];
+  questions: Question[] = [];
 
   constructor(public speech: SpeechService, private http: HttpClient) {
     window.onresize = this.onWindowResize;
@@ -22,11 +22,13 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
       console.log(phrase);
       if (phrase.type === 'answer') {
         this.recievedAnswers.push(phrase.answer);
-        const msg = new SpeechSynthesisUtterance('You answered: ' + phrase.answer);
+        let msg = new SpeechSynthesisUtterance('You answered: ' + phrase.answer);
         window.speechSynthesis.speak(msg);
         console.log(this.recievedAnswers);
       }
     });
+    this.questions.push(new Question('What is Kristens favorite animal?', 'frog'));
+    this.questions.push(new Question('What is the meaning of life?', 'null'));
   }
 
   ngOnInit() {
@@ -53,7 +55,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
     this.p5.noCanvas();
   }
 
-  private drawing = function(p: any) {
+  private drawing = function (p: any) {
     // f5 setup
     let inconsolata;
     p.preload = () => {

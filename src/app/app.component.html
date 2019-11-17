@@ -7,5 +7,9 @@
 
 </div>
 <router-outlet></router-outlet>
- 
-get the question that should be shown from query parameters, load the question and answer data from array of question items from the database
+
+<div *ngIf="questions" class="questions">
+    <div *ngFor="let question of questions">
+        <app-question [question]="question.questionString" [correctAnswer]="question.answerString"></app-question>
+    </div>
+</div>

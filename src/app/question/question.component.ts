@@ -8,7 +8,6 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 })
 export class QuestionComponent {
     @Input() question: string;
-    @Input() answers: string[];
     @Input() correctAnswer: string;
 
     constructor() { }
