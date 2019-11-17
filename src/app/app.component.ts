@@ -3,6 +3,7 @@ import * as p5 from 'p5';
 import { SpeechService } from './speech.service';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { Question } from './domain/question';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -13,14 +14,15 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
   private p5;
   spokenWords: Subscription;
   recievedAnswers: string[] = [];
+  questions: Question[];
 
   constructor(public speech: SpeechService, private http: HttpClient) {
     window.onresize = this.onWindowResize;
     this.speech.words$.subscribe(phrase => {
-      console.log(phrase)
+      console.log(phrase);
       if (phrase.type === 'answer') {
         this.recievedAnswers.push(phrase.answer);
-        let msg = new SpeechSynthesisUtterance('You answered: ' + phrase.answer);
+        const msg = new SpeechSynthesisUtterance('You answered: ' + phrase.answer);
         window.speechSynthesis.speak(msg);
         console.log(this.recievedAnswers);
       }
@@ -51,7 +53,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
     this.p5.noCanvas();
   }
 
-  private drawing = function (p: any) {
+  private drawing = function(p: any) {
     // f5 setup
     let inconsolata;
     p.preload = () => {
@@ -71,7 +73,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
       p.background(255);
       p.center.x = p.width / 2;
       p.center.y = p.height / 2;
-      let time = p.millis();
+      const time = p.millis();
       p.rotateX(time / 1000);
       p.rotateZ(time / 1234);
       p.fill(0, 0, 0);
