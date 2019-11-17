@@ -7,6 +7,7 @@ import { ListenComponent } from './listen/listen.component';
 import { QuestionComponent } from './question/question.component';
 import { SpeechService } from './speech.service';
 import { HttpClientModule } from '@angular/common/http';
+import { TimerService } from './services/timer.service';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule
   ],
   providers: [
-    SpeechService
+    SpeechService,
+    TimerService
   ],
   bootstrap: [AppComponent]
 })
