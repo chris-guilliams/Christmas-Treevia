@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class TimerService {
-    timeLeft: number = 30; // 30 seconds
+    timeLeft = 10; // 10 seconds
     interval;
 
     constructor() { }
@@ -13,9 +13,9 @@ export class TimerService {
             if (this.timeLeft > 0) {
                 this.timeLeft--;
             } else {
-                this.timeLeft = 30;
+                this.timeLeft = 10;
             }
-        }, 1000)
+        }, 1000);
     }
 
     pauseTimer() {

@@ -1,5 +1,5 @@
 // src/app/listen/listen.component.ts
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-question',

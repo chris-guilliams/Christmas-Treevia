@@ -8,12 +8,14 @@ import { QuestionComponent } from './question/question.component';
 import { SpeechService } from './speech.service';
 import { HttpClientModule } from '@angular/common/http';
 import { TimerService } from './services/timer.service';
+import { TimerComponent } from './timer/timer.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ListenComponent,
-    QuestionComponent
+    QuestionComponent,
+    TimerComponent
   ],
   imports: [
     BrowserModule,
