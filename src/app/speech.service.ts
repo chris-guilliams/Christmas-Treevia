@@ -1,6 +1,7 @@
 // src/app/speech.service.ts
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
+import { Question } from './domain/question';
 
 // TypeScript declaration for annyang
 declare var annyang: any;
@@ -10,8 +11,36 @@ export class SpeechService {
   words$ = new Subject<{[key: string]: string}>();
   errors$ = new Subject<{[key: string]: any}>();
   listening = false;
+  questions = new Array<Question>();
+  currentQuestion = new Question("", "");
+  currentQuestionNumber = 0;
 
-  constructor(private zone: NgZone) {}
+  constructor(private zone: NgZone) {
+    this.questions.push(new Question("What is more popular during the holidays?", "depression"));
+    this.questions.push(new Question("What is the name of the jolly red man?", "santa"));
+    this.questions.push(new Question("What should little children leave out for Santa on Christmas Eve?", "milk and cookies"));
+
+    this.words$.subscribe(phrase => {
+      console.log(phrase);
+      if (phrase.type === 'start') {
+        //Welcome to the Modeah Trivia Tree where you put your holiday knowledge to the ultimate test.
+        this.speakWithCallback('Beginning Game', () => {
+          this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
+        });
+      } else if (phrase.type === 'answer') {
+        if (phrase.answer.toLowerCase() === this.currentQuestion.answerString.toLowerCase()) {
+          this.speakWithCallback('You got it correct!!', () => {
+            this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
+          });
+        } else {
+          const msg = new SpeechSynthesisUtterance('The answer is obviously ' + this.currentQuestion.answerString);
+          window.speechSynthesis.speak(msg);
+        }
+      } else if (phrase.type === 'quit') {
+
+      }
+    });
+  }
 
   get speechSupported(): boolean {
     return !!annyang;
@@ -19,24 +48,9 @@ export class SpeechService {
 
   init() {
     const commands = {
-      'noun :noun': (noun) => {
+      'start game': (start) => {
         this.zone.run(() => {
-          this.words$.next({type: 'noun', 'word': noun});
-        });
-      },
-      'verb :verb': (verb) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'verb', 'word': verb});
-        });
-      },
-      'adjective :adj': (adj) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'adj', 'word': adj});
-        });
-      },
-      'play :command': (command) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'command', 'word': command});
+          this.words$.next({type: 'start'});
         });
       },
       'the answer is *answer': (answer) => {
@@ -78,9 +92,20 @@ export class SpeechService {
     });
   }
 
+  startQuestion(question: Question, questionNumber: Number) {
+    this.currentQuestion = question;
+    this.currentQuestionNumber++;
+
+    this.speakWithCallback("Here is Question number " + this.currentQuestionNumber, () => {
+      this.speakWithCallback(question.questionString, () => {
+        console.log("Question statement ended. Now Listening for answer.");
+        annyang.start();
+      });
+    });
+  }
+
   startListening() {
     annyang.start();
-    this.listening = true;
   }
 
   abort() {
@@ -88,4 +113,17 @@ export class SpeechService {
     this.listening = false;
   }
 
+  speakWithCallback(text, callback) {
+    let msg = new SpeechSynthesisUtterance(text);
+
+    // msg.onstart = function (event) {
+    //     console.log("Question statement started");
+    // };
+
+    msg.onend = function (event) {
+      callback();
+    };
+
+    window.speechSynthesis.speak(msg);
+  }
 }

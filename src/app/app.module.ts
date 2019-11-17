@@ -10,11 +10,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule, AngularFirestore } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
+import { TimerService } from './services/timer.service';
+import { TimerComponent } from './timer/timer.component';
+
 @NgModule({
   declarations: [
     AppComponent,
     ListenComponent,
-    QuestionComponent
+    QuestionComponent,
+    TimerComponent
   ],
   imports: [
     BrowserModule,
@@ -24,7 +28,8 @@ import { environment } from '../environments/environment';
   ],
   providers: [
     SpeechService,
-    AngularFirestore
+    AngularFirestore,
+    TimerService
   ],
   bootstrap: [AppComponent]
 })

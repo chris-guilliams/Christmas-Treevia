@@ -1,5 +1,5 @@
 // src/app/listen/listen.component.ts
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-question',
@@ -8,7 +8,6 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 })
 export class QuestionComponent {
     @Input() question: string;
-    @Input() answers: string[];
     @Input() correctAnswer: string;
 
     constructor() { }
