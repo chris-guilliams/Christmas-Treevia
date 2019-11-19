@@ -26,7 +26,7 @@ export class ListenComponent implements OnInit, OnDestroy {
   }
 
   get btnLabel(): string {
-    return this.speech.listening ? 'Listening...' : 'Listen';
+    return this.speech.listening ? 'Playing Game...' : 'Begin Game';
   }
 
   private _listenCommand() {
@@ -40,7 +40,6 @@ export class ListenComponent implements OnInit, OnDestroy {
       }
     );
   }
-
 
   private _listenErrors() {
     this.errorsSub = this.speech.errors$

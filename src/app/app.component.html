@@ -5,12 +5,11 @@
 	<li *ngFor="let phrase of recievedAnswers">{{ phrase }}</li>
 </ul>
 <app-timer></app-timer>
-<div id="canvas"></div>
 <router-outlet></router-outlet>
 
 
 <div *ngIf="questions" class="questions">
 	<div *ngFor="let question of questions">
-		<app-question [question]="question.questionString" [correctAnswer]="question.answerString"></app-question>
+		<app-question [question]="question.questionString" [correctAnswer]="question.answers"></app-question>
 	</div>
 </div>
