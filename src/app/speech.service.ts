@@ -11,6 +11,7 @@ declare var annyang: any;
 export class SpeechService {
   words$ = new Subject<{[key: string]: string}>();
   errors$ = new Subject<{[key: string]: any}>();
+  terribleJokes = new Array<string>();
   listening = false;
   questions = new Array<Question>();
   currentQuestion = new Question("", [""]);
@@ -27,6 +28,8 @@ export class SpeechService {
     this.questions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies"]));
     this.questions.push(new Question("What is the name of the jolly red man?", ["santa", "saint nicholas", "Chris Kringle", "Kris Kringle"]));
     this.questions.push(new Question("What is more popular during the holidays?", ["depression"]));
+
+    this.terribleJokes.push('Why did Santas helper see the doctor? Because he had a low "elf" esteem!');
 
     this.words$.subscribe(phrase => {
       console.log(phrase);
