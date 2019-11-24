@@ -3,7 +3,6 @@ import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Question } from './domain/question';
 import { callbackify } from 'util';
-import undefined = require('firebase/empty-import');
 
 // TypeScript declaration for annyang
 declare var annyang: any;
@@ -15,6 +14,8 @@ const GAMESTATE = {
   ENDING: 'ending'
 }
 
+var answerStatements = ["the answer is", "is the answer"]
+
 @Injectable()
 export class SpeechService {
   words$ = new Subject<{[key: string]: string}>();
@@ -22,7 +23,7 @@ export class SpeechService {
   terribleJokes = new Array<string>();
   listening = false;
   questions = new Array<Question>();
-  currentQuestion = new Question("", [""]);
+  currentQuestion = new Question("", [""], [""]);
   currentQuestionNumber = 0;
   soundEffectAudioVolume = 0.5;
   musicAudioVolume = 0.1;
@@ -30,13 +31,17 @@ export class SpeechService {
   musicAudio;
   countdownAudio;
   gameInProgress = false;
+
+
   speechVoice;
+  currentUtterance;
+  currentGameState = GAMESTATE.IDLE;
 
   constructor(private zone: NgZone) {
-    this.questions.push(new Question("What year was the town of Blacksburg founded?", ["1798"]))
-    this.questions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies"]));
-    this.questions.push(new Question("What is the name of the jolly red man?", ["santa", "saint nicholas", "Chris Kringle", "Kris Kringle"]));
-    this.questions.push(new Question("What is more popular during the holidays?", ["depression"]));
+    this.questions.push(new Question("What is the name of the jolly red man?", ["santa", "santa clause", "santa claws", "saint nicholas", "Chris Kringle", "Kris Kringle"], []));
+    this.questions.push(new Question("What year was the town of Blacksburg founded?", ["1798", "the year 1798", "the year of 1798"], ["of", "of the", "the year"]))
+    this.questions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
+    this.questions.push(new Question("What is more popular during the holidays?", ["depression"], []));
 
     this.terribleJokes.push('Why did Santas helper see the doctor? Because he had a low "elf" esteem!');
 
@@ -49,15 +54,7 @@ export class SpeechService {
           this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
         });
       } else if (phrase.type === 'answer') {
-        this.countdownAudio.pause();
-        
-        if (this.currentQuestion.isCorrect(phrase.answer)) {
-          this.onSuccessfulAnswer();
-          this.musicAudio.play();
-        } else {
-          this.onUnsuccessfulAnswer();
-          this.musicAudio.play();
-        }
+        this.handleAnswer(phrase.answer);
       } else if (phrase.type === 'about') {
         this.speakWithCallback('Modeah provides technology consulting to help healthcare marketers thrive in the face of change and has been serving the Blacksburg area since 2006. They are also the creators me, your trivia guide. For more information visit modeah.com', () => {
           annyang.start();
@@ -66,6 +63,15 @@ export class SpeechService {
 
       } 
     });
+  }
+
+  private handleAnswer(answer) {
+    if (this.currentQuestion.isCorrect(answer)) {
+      annyang.pause();
+      this.countdownAudio.pause();
+      this.onSuccessfulAnswer();
+      this.musicAudio.play();
+    }
   }
 
   private setupSpeechSynthesis() {
@@ -98,6 +104,7 @@ export class SpeechService {
   startGame() {
     // annyang.start();
     if (!this.gameInProgress) {
+      this.currentGameState = GAMESTATE.IDLE;
       this.setupSpeechSynthesis();
       this.gameInProgress = true;
 
@@ -105,28 +112,28 @@ export class SpeechService {
       this.musicAudio = new Audio('/assets/audio/christmas_song.mp3');
       this.musicAudio.volume = 0.2;
       this.musicAudio.play();
-  
-      setTimeout(() => {
-        this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start game to begin.', () => {
-          annyang.start();
-        });
-      }, 2500);
+
+      this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
+
+    //   setTimeout(() => {
+    //     this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start game to begin.', () => {
+    //       annyang.start();
+    //     });
+    //   }, 2500);
     }
   }
 
   startQuestion(question: Question, questionNumber: Number) {
+    this.currentGameState = GAMESTATE.QUESTION;
     this.currentQuestion = question;
     this.currentQuestionNumber++;
 
-    this.speakWithCallback("Here is Question number " + this.currentQuestionNumber, () => {
-      this.speakWithCallback(question.questionString, () => {
-        this.countdownAudio = new Audio('/assets/audio/jeopardy_ten_second_timer.mp3');
-        this.countdownAudio.volume = 0.25;
-        this.countdownAudio.play();
-        console.log("Question statement ended. Now Listening for answer.");
-        this.musicAudio.pause();
-        annyang.start();
-      });
+    this.speakWithCallback("Here is Question number " + this.currentQuestionNumber + ' ... ... ... ... ... ' + question.questionString, () => {
+      this.countdownAudio = new Audio('/assets/audio/jeopardy_ten_second_timer.mp3');
+      this.countdownAudio.volume = 0.25;
+      this.musicAudio.pause();
+      this.countdownAudio.play();
+      annyang.start();
     });
   }
 
@@ -147,16 +154,16 @@ export class SpeechService {
   }
 
   speakWithCallback(text, callback) {
-    let msg = new SpeechSynthesisUtterance(text);
-    msg.voice = this.speechVoice;
-    msg.rate = 0.9;
-    msg.volume = this.speechVolume;
+    this.currentUtterance = new SpeechSynthesisUtterance(text);
+    this.currentUtterance.voice = this.speechVoice;
+    this.currentUtterance.rate = 0.9;
+    this.currentUtterance.volume = this.speechVolume;
 
-    msg.onend = function (event) {
+    this.currentUtterance.onend = function (event) {
       callback();
     };
 
-    window.speechSynthesis.speak(msg);
+    window.speechSynthesis.speak(this.currentUtterance);
   }
 
   loadQuestions() {
@@ -166,8 +173,11 @@ export class SpeechService {
 
   onSuccessfulAnswer() {
     //TODO: LIGHT CODE HERE
+    this.currentGameState = GAMESTATE.IDLE;
+    this.countdownAudio.pause();
+    this.musicAudio.play();
     this.playSoundWithCallback('/assets/audio/correct.mp3', 0.5, () => {
-      this.speakWithCallback('You got it correct!!', () => {
+      this.speakWithCallback('That is correct! Well done!', () => {
         this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
       });
     });
@@ -175,6 +185,8 @@ export class SpeechService {
 
   onUnsuccessfulAnswer() {
     //TODO: LIGHT CODE HERE
+    this.currentGameState = GAMESTATE.ENDING;
+    this.countdownAudio.pause;
     this.playSoundWithCallback('/assets/audio/incorrect.mp3', 0.5, () => {
       this.speakWithCallback('I am sorry, but that is incorrect. Better luck next time.', () => {
         this.currentQuestionNumber = 0;
@@ -237,10 +249,29 @@ export class SpeechService {
       this._handleError('denied', 'User denied microphone permissions.', err);
     });
     annyang.addCallback('resultNoMatch', (userSaid) => {
-      this._handleError(
-        'no match',
-        'Spoken command not recognized. Say "noun [word]", "verb [word]", OR "adjective [word]".',
-        { results: userSaid });
+      if (this.currentGameState == GAMESTATE.QUESTION && this.textMatchesAnswerCase(userSaid)) {
+        this.onSuccessfulAnswer();
+      } else {
+        this._handleError(
+          'no match',
+          'Spoken command not recognized. Say "noun [word]", "verb [word]", OR "adjective [word]".',
+          { results: userSaid });
+      }
     });
+  }
+
+  private textMatchesAnswerCase(possibleUserMatches) {
+    var correct = false;
+
+    possibleUserMatches.forEach(text => {
+      var correctedText = text.toLowerCase();
+
+      if (this.currentQuestion.isCorrect(text)) {
+        correct = true;
+        return;
+      }
+    });
+
+    return correct;
   }
 }

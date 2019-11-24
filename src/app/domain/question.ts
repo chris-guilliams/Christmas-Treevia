@@ -2,29 +2,49 @@
 export class Question {
     constructor(
         public questionString: string,
-        public answers: Array<string>
+        public answers: Array<string>,
+        public ignoredCases: Array<string>
     ) { }
 
     isCorrect(guess: string) {
         var correct = false;
-        var normalizedGuess = guess.toLowerCase();
-        console.log(guess);
-        this.answers.forEach(function (answer) {
-            var normalizedAnswer = answer.toLowerCase();
+        var ingoredCaseMatched = false;
+        var normalizedGuess = guess.toLowerCase().trim();
 
-            console.log(guess);
+        this.answers.forEach((answer) => {
+            if (!ingoredCaseMatched) {
+                console.log("Checking guess")
+                var normalizedAnswer = answer.toLowerCase();
+                
+                if (ingoredCaseMatched || correct) {
+                    return;
+                }
 
-            if (normalizedAnswer === normalizedGuess) {
-                correct = true;
-                return;
-            }
+                this.ignoredCases.forEach((ignored) => {
+                    if (normalizedGuess === ignored) {
+                        ingoredCaseMatched = true;
+                        return;
+                    }
+                });
 
-            if (normalizedAnswer.includes(normalizedGuess)) {
-                correct = true;
-                return true;
+                if (ingoredCaseMatched || correct) {
+                    return;
+                }
+    
+                if (normalizedAnswer === normalizedGuess) {
+                    correct = true;
+                    return;
+                } else if (normalizedGuess.includes(normalizedAnswer)) {
+                    correct = true;
+                    return;
+                } else if (normalizedAnswer.includes(normalizedGuess)) {
+                    correct = true;
+                    return;
+                }
             }
         });
 
+        console.log("Answer is " + correct);
         return correct;
     }
 }
