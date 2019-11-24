@@ -16,14 +16,20 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
   recievedAnswers: string[] = [];
   questions: Question[] = [];
 
+  hasLoaded = false;
+
   constructor(public speech: SpeechService, private http: HttpClient, private db: AngularFirestore) {
-    db.collection('triviaPlays').valueChanges().subscribe((change) => {
-      console.log('The collection was changed', change);
-    });
   }
 
   ngOnInit() {
-    
+    this.db.collection('triviaPlays').valueChanges().subscribe((change) => {
+      console.log('The collection was changed', change);
+      if (this.hasLoaded) {
+        this.speech.startGame();
+      } else {
+        this.hasLoaded = true;
+      }
+    });
   }
 
   startGame() {

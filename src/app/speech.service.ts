@@ -19,7 +19,7 @@ var answerStatements = ["the answer is", "is the answer"]
 
 @Injectable()
 export class SpeechService {
-  twinkly;
+  twinkly = new Twinkly('192.168.43.137');
   words$ = new Subject<{[key: string]: string}>();
   errors$ = new Subject<{[key: string]: any}>();
   terribleJokes = new Array<string>();
