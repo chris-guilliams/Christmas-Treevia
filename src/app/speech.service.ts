@@ -40,8 +40,6 @@ export class SpeechService {
   currentGameState = GAMESTATE.IDLE;
 
   constructor(private zone: NgZone) {
-    this.twinkly = new TwinklyLights('192.168.43.137');
-    this.twinkly.playSuccessMovie();
     this.questions.push(new Question("What is the name of the jolly red man?", ["santa", "santa clause", "santa claws", "saint nicholas", "Chris Kringle", "Kris Kringle"], ["claws", "saint", "nicholas", "chris", "kris"]));
     this.questions.push(new Question("What year was the town of Blacksburg founded?", ["1798", "the year 1798", "the year of 1798"], ["of", "of the", "the year"]))
     this.questions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
