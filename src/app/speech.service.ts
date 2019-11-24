@@ -3,9 +3,17 @@ import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Question } from './domain/question';
 import { callbackify } from 'util';
+import undefined = require('firebase/empty-import');
 
 // TypeScript declaration for annyang
 declare var annyang: any;
+
+const GAMESTATE = {
+  IDLE: 'idle',
+  INTRO: 'intro',
+  QUESTION: 'question',
+  ENDING: 'ending'
+}
 
 @Injectable()
 export class SpeechService {
@@ -22,6 +30,7 @@ export class SpeechService {
   musicAudio;
   countdownAudio;
   gameInProgress = false;
+  speechVoice;
 
   constructor(private zone: NgZone) {
     this.questions.push(new Question("What year was the town of Blacksburg founded?", ["1798"]))
@@ -31,11 +40,12 @@ export class SpeechService {
 
     this.terribleJokes.push('Why did Santas helper see the doctor? Because he had a low "elf" esteem!');
 
+    this.setupSpeechSynthesis();
+
     this.words$.subscribe(phrase => {
       console.log(phrase);
       if (phrase.type === 'start') {
-        //Welcome to the Modeah Trivia Tree where you put your holiday knowledge to the ultimate test.
-        this.speakWithCallback('Beginning Game', () => {
+        this.speakWithCallback('You will be given a total of 10 questions. Good luck. ... ...', () => {
           this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
         });
       } else if (phrase.type === 'answer') {
@@ -43,53 +53,36 @@ export class SpeechService {
         
         if (this.currentQuestion.isCorrect(phrase.answer)) {
           this.onSuccessfulAnswer();
+          this.musicAudio.play();
         } else {
           this.onUnsuccessfulAnswer();
+          this.musicAudio.play();
         }
+      } else if (phrase.type === 'about') {
+        this.speakWithCallback('Modeah provides technology consulting to help healthcare marketers thrive in the face of change and has been serving the Blacksburg area since 2006. They are also the creators me, your trivia guide. For more information visit modeah.com', () => {
+          annyang.start();
+        });
       } else if (phrase.type === 'quit') {
 
       } 
     });
   }
 
-  get speechSupported(): boolean {
-    return !!annyang;
+  private setupSpeechSynthesis() {
+    var availableVoices = window.speechSynthesis.getVoices();
+
+    console.log("Available Voices");
+    console.log(availableVoices);
+
+    var selectedVoice = availableVoices.filter(function(voice) { return voice.name == 'Google US English'; })[0];
+
+    if (selectedVoice != undefined) {
+      this.speechVoice = selectedVoice;
+    }
   }
 
-  init() {
-    const commands = {
-      'start game': (start) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'start'});
-        });
-      },
-      'the answer is *answer': (answer) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'answer', 'answer': answer});
-        });
-      }
-    };
-    annyang.addCommands(commands);
-
-    // Log anything the user says and what speech recognition thinks it might be
-    annyang.addCallback('result', (userSaid) => {
-      console.log('User may have said:', userSaid);
-    });
-    annyang.addCallback('errorNetwork', (err) => {
-      this._handleError('network', 'A network error occurred.', err);
-    });
-    annyang.addCallback('errorPermissionBlocked', (err) => {
-      this._handleError('blocked', 'Browser blocked microphone permissions.', err);
-    });
-    annyang.addCallback('errorPermissionDenied', (err) => {
-      this._handleError('denied', 'User denied microphone permissions.', err);
-    });
-    annyang.addCallback('resultNoMatch', (userSaid) => {
-      this._handleError(
-        'no match',
-        'Spoken command not recognized. Say "noun [word]", "verb [word]", OR "adjective [word]".',
-        { results: userSaid });
-    });
+  get speechSupported(): boolean {
+    return !!annyang;
   }
 
   private _handleError(error, msg, errObj) {
@@ -102,6 +95,25 @@ export class SpeechService {
     });
   }
 
+  startGame() {
+    // annyang.start();
+    if (!this.gameInProgress) {
+      this.setupSpeechSynthesis();
+      this.gameInProgress = true;
+
+      this.loadQuestions();
+      this.musicAudio = new Audio('/assets/audio/christmas_song.mp3');
+      this.musicAudio.volume = 0.2;
+      this.musicAudio.play();
+  
+      setTimeout(() => {
+        this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start game to begin.', () => {
+          annyang.start();
+        });
+      }, 2500);
+    }
+  }
+
   startQuestion(question: Question, questionNumber: Number) {
     this.currentQuestion = question;
     this.currentQuestionNumber++;
@@ -112,26 +124,10 @@ export class SpeechService {
         this.countdownAudio.volume = 0.25;
         this.countdownAudio.play();
         console.log("Question statement ended. Now Listening for answer.");
+        this.musicAudio.pause();
         annyang.start();
       });
     });
-  }
-
-  startGame() {
-    // annyang.start();
-    if (!this.gameInProgress) {
-      this.gameInProgress = true;
-
-      this.loadQuestions();
-      this.musicAudio = new Audio('/assets/audio/christmas_song.mp3');
-      this.musicAudio.volume = 0.1;
-      this.musicAudio.play();
-  
-        this.speakWithCallback('Welcome to the Modeah Trivia Tree', () => {
-          this.musicAudio.pause();
-          this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
-        });
-    }
   }
 
   abort() {
@@ -152,6 +148,8 @@ export class SpeechService {
 
   speakWithCallback(text, callback) {
     let msg = new SpeechSynthesisUtterance(text);
+    msg.voice = this.speechVoice;
+    msg.rate = 0.9;
     msg.volume = this.speechVolume;
 
     msg.onend = function (event) {
@@ -182,6 +180,67 @@ export class SpeechService {
         this.currentQuestionNumber = 0;
         this.gameInProgress = false;
       });
+    });
+  }
+
+  init() {
+    const commands = {
+      'start game': (start) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'start'});
+        });
+      },
+      'start': (start) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'start'});
+        });
+      },
+      'begin': (start) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'start'});
+        });
+      },
+      'lets go': (start) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'start'});
+        });
+      },
+      'tell me about modea': (start) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'about'});
+        });
+      },
+      'tell me about madea': (start) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'about'});
+        });
+      },
+      'the answer is *answer': (answer) => {
+        this.zone.run(() => {
+          this.words$.next({type: 'answer', 'answer': answer});
+        });
+      }
+    };
+    annyang.addCommands(commands);
+
+    // Log anything the user says and what speech recognition thinks it might be
+    annyang.addCallback('result', (userSaid) => {
+      console.log('User may have said:', userSaid);
+    });
+    annyang.addCallback('errorNetwork', (err) => {
+      this._handleError('network', 'A network error occurred.', err);
+    });
+    annyang.addCallback('errorPermissionBlocked', (err) => {
+      this._handleError('blocked', 'Browser blocked microphone permissions.', err);
+    });
+    annyang.addCallback('errorPermissionDenied', (err) => {
+      this._handleError('denied', 'User denied microphone permissions.', err);
+    });
+    annyang.addCallback('resultNoMatch', (userSaid) => {
+      this._handleError(
+        'no match',
+        'Spoken command not recognized. Say "noun [word]", "verb [word]", OR "adjective [word]".',
+        { results: userSaid });
     });
   }
 }
