@@ -10,7 +10,7 @@ export class TwinklyLights {
 		this.axios = axios;
 	}
 	getBaseUrl () {
-		return `http://${this.ip}:80/xled/v1/`;
+		return `https://${this.ip}:80/xled/v1/`;
 	}
 	generateToken () {
 		const _this = this;
