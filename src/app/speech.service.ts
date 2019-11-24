@@ -53,8 +53,6 @@ export class SpeechService {
         this.speakWithCallback('You will be given a total of 10 questions. Good luck. ... ...', () => {
           this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
         });
-      } else if (phrase.type === 'answer') {
-        this.handleAnswer(phrase.answer);
       } else if (phrase.type === 'about') {
         this.speakWithCallback('Modeah provides technology consulting to help healthcare marketers thrive in the face of change and has been serving the Blacksburg area since 2006. They are also the creators me, your trivia guide. For more information visit modeah.com', () => {
           annyang.start();
@@ -113,13 +111,13 @@ export class SpeechService {
       this.musicAudio.volume = 0.2;
       this.musicAudio.play();
 
-      this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
+      //this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
 
-    //   setTimeout(() => {
-    //     this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start game to begin.', () => {
-    //       annyang.start();
-    //     });
-    //   }, 2500);
+      setTimeout(() => {
+        this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start game to begin.', () => {
+          annyang.start();
+        });
+      }, 2500);
     }
   }
 
@@ -131,8 +129,14 @@ export class SpeechService {
     this.speakWithCallback("Here is Question number " + this.currentQuestionNumber + ' ... ... ... ... ... ' + question.questionString, () => {
       this.countdownAudio = new Audio('/assets/audio/jeopardy_ten_second_timer.mp3');
       this.countdownAudio.volume = 0.25;
+
+      this.countdownAudio.onended = () => {
+        this.onUnsuccessfulAnswer();
+      };
+
       this.musicAudio.pause();
       this.countdownAudio.play();
+
       annyang.start();
     });
   }
@@ -173,6 +177,7 @@ export class SpeechService {
 
   onSuccessfulAnswer() {
     //TODO: LIGHT CODE HERE
+    annyang.pause();
     this.currentGameState = GAMESTATE.IDLE;
     this.countdownAudio.pause();
     this.musicAudio.play();
@@ -185,15 +190,28 @@ export class SpeechService {
 
   onUnsuccessfulAnswer() {
     //TODO: LIGHT CODE HERE
+    annyang.pause();
     this.currentGameState = GAMESTATE.ENDING;
     this.countdownAudio.pause;
+    this.musicAudio.play();
     this.playSoundWithCallback('/assets/audio/incorrect.mp3', 0.5, () => {
-      this.speakWithCallback('I am sorry, but that is incorrect. Better luck next time.', () => {
+      this.speakWithCallback('I am sorry, but your time is up. Thank you for playing and have a merry Christmas', () => {
         this.currentQuestionNumber = 0;
         this.gameInProgress = false;
+        this.currentGameState == GAMESTATE.IDLE;
       });
     });
   }
+
+  // private fadeVolOut(newPercent){
+  //   if(newPercent > 0){
+  //   setVolume(newPercent);
+  //   this.musicAudio.volume
+  //   setTimeout('fadeVolIn(' + (newPercent + 1) + ');', 50);
+  //   }
+
+  //   this.musicAudio.pause();
+  // }
 
   init() {
     const commands = {
@@ -225,11 +243,6 @@ export class SpeechService {
       'tell me about madea': (start) => {
         this.zone.run(() => {
           this.words$.next({type: 'about'});
-        });
-      },
-      'the answer is *answer': (answer) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'answer', 'answer': answer});
         });
       }
     };
