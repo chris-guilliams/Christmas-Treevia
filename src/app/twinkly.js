@@ -10,7 +10,7 @@ export class TwinklyLights {
 		this.axios = axios;
 	}
 	getBaseUrl () {
-		return `https://${this.ip}:80/xled/v1/`;
+		return `http://${this.ip}:80/xled/v1/`;
 	}
 	generateToken () {
 		const _this = this;
@@ -134,6 +134,7 @@ export class TwinklyLights {
 		})
 	}
 	playSuccessMovie() {
+		console.log("PLAYING MOVIE");
 		const pattern = require('./fill.js').generateSolidColorJSON(this, 0, 244, 0);
 
 		this.newMovieUpload({
