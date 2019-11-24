@@ -103,7 +103,6 @@ export class SpeechService {
 
   startGame() {
     // annyang.start();
-    this.twinkly.playSuccessMovie();
     if (!this.gameInProgress) {
       this.currentGameState = GAMESTATE.IDLE;
       this.setupSpeechSynthesis();
