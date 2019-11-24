@@ -3,7 +3,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Question } from './domain/question';
 import { callbackify } from 'util';
-import { Twinkly } from './twinkly-api.js';
+import { TwinklyLights } from './twinkly.js'
 
 // TypeScript declaration for annyang
 declare var annyang: any;
@@ -19,7 +19,7 @@ var answerStatements = ["the answer is", "is the answer"]
 
 @Injectable()
 export class SpeechService {
-  twinkly = new Twinkly('192.168.43.137');
+  twinkly;
   words$ = new Subject<{[key: string]: string}>();
   errors$ = new Subject<{[key: string]: any}>();
   terribleJokes = new Array<string>();
@@ -40,6 +40,8 @@ export class SpeechService {
   currentGameState = GAMESTATE.IDLE;
 
   constructor(private zone: NgZone) {
+    this.twinkly = new TwinklyLights('192.168.43.137');
+    this.twinkly.playSuccessMovie();
     this.questions.push(new Question("What is the name of the jolly red man?", ["santa", "santa clause", "santa claws", "saint nicholas", "Chris Kringle", "Kris Kringle"], ["claws", "saint", "nicholas", "chris", "kris"]));
     this.questions.push(new Question("What year was the town of Blacksburg founded?", ["1798", "the year 1798", "the year of 1798"], ["of", "of the", "the year"]))
     this.questions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
@@ -178,7 +180,7 @@ export class SpeechService {
   }
 
   onSuccessfulAnswer() {
-    //TODO: LIGHT CODE HERE
+    this.twinkly.playSuccessMovie();
     annyang.pause();
     this.currentGameState = GAMESTATE.IDLE;
     this.countdownAudio.pause();
@@ -191,7 +193,7 @@ export class SpeechService {
   }
 
   onUnsuccessfulAnswer() {
-    //TODO: LIGHT CODE HERE
+    this.twinkly.playFailureMovie();
     annyang.pause();
     this.currentGameState = GAMESTATE.ENDING;
     this.countdownAudio.pause;
