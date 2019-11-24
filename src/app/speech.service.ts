@@ -111,7 +111,7 @@ export class SpeechService {
       this.musicAudio.volume = 0.2;
       this.musicAudio.play();
 
-      //this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
+      // this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
 
       setTimeout(() => {
         this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start game to begin.', () => {
