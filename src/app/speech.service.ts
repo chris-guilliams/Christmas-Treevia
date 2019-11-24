@@ -3,6 +3,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Question } from './domain/question';
 import { callbackify } from 'util';
+import { Twinkly } from './twinkly-api.js';
 
 // TypeScript declaration for annyang
 declare var annyang: any;
@@ -18,6 +19,7 @@ var answerStatements = ["the answer is", "is the answer"]
 
 @Injectable()
 export class SpeechService {
+  twinkly = new Twinkly('192.168.43.137');
   words$ = new Subject<{[key: string]: string}>();
   errors$ = new Subject<{[key: string]: any}>();
   terribleJokes = new Array<string>();
