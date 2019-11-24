@@ -13,7 +13,6 @@ export class Question {
 
         this.answers.forEach((answer) => {
             if (!ingoredCaseMatched) {
-                console.log("Checking guess")
                 var normalizedAnswer = answer.toLowerCase();
                 
                 if (ingoredCaseMatched || correct) {
@@ -44,7 +43,6 @@ export class Question {
             }
         });
 
-        console.log("Answer is " + correct);
         return correct;
     }
 }
