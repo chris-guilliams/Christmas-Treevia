@@ -19,43 +19,34 @@ var answerStatements = ["the answer is", "is the answer"]
 
 @Injectable()
 export class SpeechService {
-  twinkly = new TwinklyLights('192.168.43.137');
+  twinkly = new TwinklyLights('192.168.43.41');
   words$ = new Subject<{[key: string]: string}>();
   errors$ = new Subject<{[key: string]: any}>();
-  terribleJokes = new Array<string>();
   listening = false;
-  questions = new Array<Question>();
+  easyQuestions = new Array<Question>();
+  mediumQuestions = new Array<Question>();
+  hardQuestions = new Array<Question>();
+  gameQuestions = new Array<Question>();
   currentQuestion = new Question("", [""], [""]);
   currentQuestionNumber = 0;
   soundEffectAudioVolume = 0.5;
-  musicAudioVolume = 0.1;
+  musicAudioVolume = 0.05;
   speechVolume = 0.5;
   musicAudio;
   countdownAudio;
   gameInProgress = false;
-
-
+  totalQuestionsToServe = 3;
   speechVoice;
   currentUtterance;
   currentGameState = GAMESTATE.IDLE;
 
   constructor(private zone: NgZone) {
-    this.questions.push(new Question("What is the name of the jolly red man?", ["santa", "santa clause", "santa claws", "saint nicholas", "Chris Kringle", "Kris Kringle"], ["claws", "saint", "nicholas", "chris", "kris"]));
-    this.questions.push(new Question("What year was the town of Blacksburg founded?", ["1798", "the year 1798", "the year of 1798"], ["of", "of the", "the year"]))
-    this.questions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
-    this.questions.push(new Question("What is more popular during the holidays?", ["depression"], []));
-
-    this.terribleJokes.push('Why did Santas helper see the doctor? Because he had a low "elf" esteem!');
-
+    this.setupQuestions();
     this.setupSpeechSynthesis();
 
     this.words$.subscribe(phrase => {
       console.log(phrase);
-      if (phrase.type === 'start') {
-        this.speakWithCallback('You will be given a total of 10 questions. Good luck. ... ...', () => {
-          this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
-        });
-      } else if (phrase.type === 'about') {
+      if (phrase.type === 'about') {
         this.speakWithCallback('Modeah provides technology consulting to help healthcare marketers thrive in the face of change and has been serving the Blacksburg area since 2006. They are also the creators me, your trivia guide. For more information visit modeah.com', () => {
           annyang.start();
         });
@@ -65,14 +56,28 @@ export class SpeechService {
     });
   }
 
-  private handleAnswer(answer) {
-    if (this.currentQuestion.isCorrect(answer)) {
-      annyang.pause();
-      this.countdownAudio.pause();
-      this.onSuccessfulAnswer();
-      this.musicAudio.play();
-    }
+  private setupQuestions() {
+    //SETUP EASY QUESITONS
+    this.easyQuestions.push(new Question("What is the name of the jolly red man?", ["santa", "santa clause", "santa claws", "saint nicholas", "Chris Kringle", "Kris Kringle"], ["claws", "saint", "nicholas", "chris", "kris"]));
+    this.easyQuestions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
+    this.mediumQuestions.push(new Question("Where is Santas workshop located", ["North Pole"], ["North", "Pole"]));
+
+    //SETUP MEDIUM QUESITONS
+    this.mediumQuestions.push(new Question("Why is life unfair?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
+
+    //SETUP HARD QUESITONS
+    this.hardQuestions.push(new Question("What year was the town of Blacksburg founded?", ["1798", "the year 1798", "the year of 1798"], ["of", "of the", "the year"]))
+
   }
+
+  // private handleAnswer(answer) {
+  //   if (this.currentQuestion.isCorrect(answer)) {
+  //     annyang.pause();
+  //     this.countdownAudio.pause();
+  //     this.onSuccessfulAnswer();
+  //     this.musicAudio.play();
+  //   }
+  // }
 
   private setupSpeechSynthesis() {
     var availableVoices = window.speechSynthesis.getVoices();
@@ -102,28 +107,32 @@ export class SpeechService {
   }
 
   startGame() {
-    // annyang.start();
     if (!this.gameInProgress) {
-      this.currentGameState = GAMESTATE.IDLE;
+      this.currentGameState = GAMESTATE.INTRO;
       this.setupSpeechSynthesis();
       this.gameInProgress = true;
 
       this.loadQuestions();
       this.musicAudio = new Audio('/assets/audio/christmas_song.mp3');
-      this.musicAudio.volume = 0.2;
+      this.musicAudio.volume = 0.1;
       this.musicAudio.play();
 
-      // this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
+      this.startQuestion(this.gameQuestions[this.currentQuestionNumber], this.currentQuestionNumber);
 
-      setTimeout(() => {
-        this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start game to begin.', () => {
-          annyang.start();
-        });
-      }, 2500);
+      // setTimeout(() => {
+      //   this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start.', () => {
+      //     annyang.start();
+      //   });
+      // }, 2500);
     }
   }
 
   startQuestion(question: Question, questionNumber: Number) {
+    if (this.currentQuestionNumber > this.totalQuestionsToServe - 1) {
+      this.endGameOnSuccess();
+      return;
+    }
+
     this.currentGameState = GAMESTATE.QUESTION;
     this.currentQuestion = question;
     this.currentQuestionNumber++;
@@ -140,6 +149,14 @@ export class SpeechService {
       this.countdownAudio.play();
 
       annyang.start();
+    });
+  }
+
+  endGameOnSuccess() {
+    this.speakWithCallback('Congratulations!!! You just got all ' + this.totalQuestionsToServe + ' questions correct! You are a trivia god among gods! Have a merry Christmas', () => {
+      this.gameInProgress = false;
+      this.currentGameState = GAMESTATE.IDLE;
+      this.musicAudio.pause();
     });
   }
 
@@ -173,32 +190,35 @@ export class SpeechService {
   }
 
   loadQuestions() {
-    //TODO: PUT CODE TO LOAD QUESTIONS HERE
-    //this.questions = ...
+    this.gameQuestions = new Array<Question>();
+    this.gameQuestions.push(this.easyQuestions[Math.floor(Math.random()*this.easyQuestions.length)]);
+    this.gameQuestions.push(this.mediumQuestions[Math.floor(Math.random()*this.mediumQuestions.length)]);
+    this.gameQuestions.push(this.hardQuestions[Math.floor(Math.random()*this.hardQuestions.length)]);
   }
 
   onSuccessfulAnswer() {
-    this.twinkly.playSuccessMovie();
     annyang.pause();
+    this.twinkly.playSuccessMovie();
     this.currentGameState = GAMESTATE.IDLE;
     this.countdownAudio.pause();
     this.musicAudio.play();
     this.playSoundWithCallback('/assets/audio/correct.mp3', 0.5, () => {
       this.speakWithCallback('That is correct! Well done!', () => {
-        this.startQuestion(this.questions[this.currentQuestionNumber], this.currentQuestionNumber);
+        this.startQuestion(this.gameQuestions[this.currentQuestionNumber], this.currentQuestionNumber);
       });
     });
   }
 
   onUnsuccessfulAnswer() {
-    this.twinkly.playFailureMovie();
     annyang.pause();
+    this.twinkly.playFailureMovie();
     this.currentGameState = GAMESTATE.ENDING;
     this.countdownAudio.pause;
     this.musicAudio.play();
     this.playSoundWithCallback('/assets/audio/incorrect.mp3', 0.5, () => {
       this.speakWithCallback('I am sorry, but your time is up. Thank you for playing and have a merry Christmas', () => {
         this.currentQuestionNumber = 0;
+        this.musicAudio.pause();
         this.gameInProgress = false;
         this.currentGameState == GAMESTATE.IDLE;
       });
@@ -264,7 +284,11 @@ export class SpeechService {
       this._handleError('denied', 'User denied microphone permissions.', err);
     });
     annyang.addCallback('resultNoMatch', (userSaid) => {
-      if (this.currentGameState == GAMESTATE.QUESTION && this.textMatchesAnswerCase(userSaid)) {
+      if (this.currentGameState == GAMESTATE.INTRO && this.textMatchesIntroCase(userSaid)) {
+        this.speakWithCallback('You will be given a total of ' + this.totalQuestionsToServe + ' questions of increasing difficulty. Good luck. ... ...', () => {
+          this.startQuestion(this.gameQuestions[this.currentQuestionNumber], this.currentQuestionNumber);
+        });
+      } else if (this.currentGameState == GAMESTATE.QUESTION && this.textMatchesAnswerCase(userSaid)) {
         this.onSuccessfulAnswer();
       } else {
         this._handleError(
@@ -273,6 +297,23 @@ export class SpeechService {
           { results: userSaid });
       }
     });
+  }
+
+  private textMatchesIntroCase(possibleUserMatches) {
+    var correct = false;
+
+    possibleUserMatches.forEach(text => {
+      if (!correct) {
+        var correctedText = text.toLowerCase();
+  
+        if (correctedText.includes("begin") || correctedText.includes("start")) {
+          correct = true;
+          return;
+        }
+      }
+    });
+
+    return correct;
   }
 
   private textMatchesAnswerCase(possibleUserMatches) {
