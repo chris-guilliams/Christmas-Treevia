@@ -58,10 +58,10 @@ export class SpeechService {
 
   private setupQuestions() {
     //SETUP EASY QUESITONS
-    this.easyQuestions.push(new Question("What do naughty kids get for christmas?", ["coal", "cole"], []));
     this.easyQuestions.push(new Question("What is the name of the jolly red man?", ["santa", "santa clause", "santa claws", "saint nicholas", "Chris Kringle", "Kris Kringle"], ["claws", "saint", "nicholas", "chris", "kris"]));
     this.easyQuestions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
     this.easyQuestions.push(new Question("Where is Santas workshop located", ["North Pole"], ["North", "Pole"]));
+    this.easyQuestions.push(new Question("Which reindeer has a red nose?", ["Rudolph"], []))
 
     //SETUP MEDIUM QUESITONS
     this.mediumQuestions.push(new Question("Why is life unfair?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
@@ -69,8 +69,8 @@ export class SpeechService {
     //SETUP HARD QUESITONS
     this.hardQuestions.push(new Question("What year was the town of Blacksburg founded?", ["1798", "the year 1798", "the year of 1798"], ["of", "of the", "the year"]))
     this.hardQuestions.push(new Question("Which country did eggnog come from?", ["England"], []))
-    this.hardQuestions.push(new Question("Which one of Santa’s reindeer has the same name as another holiday mascot?", ["Cupid"], []))
     this.hardQuestions.push(new Question("What is the tallest building on Virginia Tech campus?", ["Slusher Tower", "Slusher Hall", "Slusher"], ["Tower"]))
+    this.hardQuestions.push(new Question("How many blocks was the original town of Blacksburg?", ["16", "sixteen", "sixteen blocks"], ["blocks"]));
   }
 
   // private handleAnswer(answer) {
@@ -163,7 +163,7 @@ export class SpeechService {
   }
 
   endGameOnSuccess() {
-    this.speakWithCallback('Congratulations!!! You just got all ' + this.totalQuestionsToServe + ' questions correct! You are a trivia god among gods! Have a merry Christmas', () => {
+    this.speakWithCallback('Congratulations!!! You just got all ' + this.totalQuestionsToServe + ' questions correct! You are a trivia legend! Have a merry Christmas', () => {
       this.gameInProgress = false;
       this.currentQuestionNumber = 0;
       this.currentGameState = GAMESTATE.IDLE;
@@ -228,12 +228,14 @@ export class SpeechService {
     this.countdownAudio.pause;
     this.musicAudio.play();
     this.playSoundWithCallback('/assets/audio/incorrect.mp3', 0.5, () => {
-      this.speakWithCallback('I am sorry, but your time is up. Better luck next time and thank you for playing. Have a merry Christmas', () => {
-        this.currentQuestionNumber = 0;
-        this.musicAudio.pause();
-        this.gameInProgress = false;
-        this.currentGameState == GAMESTATE.IDLE;
-        this.abort();
+      this.speakWithCallback('I am sorry but that is incorrect. The correct answer is ' + this.currentQuestion.answers[0], () => {
+        this.speakWithCallback('Better luck next time and thank you for playing and have a merry Christmas', () => {
+          this.currentQuestionNumber = 0;
+          this.musicAudio.pause();
+          this.gameInProgress = false;
+          this.currentGameState == GAMESTATE.IDLE;
+          this.abort();
+        });
       });
     });
   }
