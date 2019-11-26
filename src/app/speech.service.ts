@@ -45,14 +45,14 @@ export class SpeechService {
     this.setupSpeechSynthesis();
 
     this.words$.subscribe(phrase => {
-      console.log(phrase);
-      if (phrase.type === 'about') {
-        this.speakWithCallback('Modeah provides technology consulting to help healthcare marketers thrive in the face of change and has been serving the Blacksburg area since 2006. They are also the creators me, your trivia guide. For more information visit modeah.com', () => {
-          //annyang.start({ continuous: true });
-        });
-      } else if (phrase.type === 'quit') {
+      // console.log(phrase);
+      // if (phrase.type === 'about') {
+      //   this.speakWithCallback('Modeah provides technology consulting to help healthcare marketers thrive in the face of change and has been serving the Blacksburg area since 2006. They are also the creators me, your trivia guide. For more information visit modeah.com', () => {
+      //     //annyang.start({ continuous: true });
+      //   });
+      // } else if (phrase.type === 'quit') {
 
-      } 
+      // } 
     });
   }
 
@@ -115,8 +115,9 @@ export class SpeechService {
       this.currentGameState = GAMESTATE.INTRO;
       this.setupSpeechSynthesis();
       this.gameInProgress = true;
-      annyang.start({ continuous: true });
+      annyang.start({ continuous: false });
       annyang.pause();
+      console.log("IS LISTENING: " + annyang.isListening());
 
       this.loadQuestions();
       this.musicAudio = new Audio('/assets/audio/christmas_song.mp3');
@@ -150,6 +151,7 @@ export class SpeechService {
     this.speakWithCallback("Here is Question number " + this.currentQuestionNumber + ' ... ... ... ... ... ' + question.questionString, () => {
       
       annyang.resume();
+      console.log("IS LISTENING: " + annyang.isListening());
       this.countdownAudio = new Audio('/assets/audio/jeopardy_ten_second_timer.mp3');
       this.countdownAudio.volume = 0.25;
 
@@ -210,6 +212,7 @@ export class SpeechService {
 
   onSuccessfulAnswer() {
     annyang.pause();
+    console.log("IS LISTENING: " + annyang.isListening());
     this.twinkly.playSuccessMovie();
     this.currentGameState = GAMESTATE.IDLE;
     this.countdownAudio.pause();
@@ -223,6 +226,7 @@ export class SpeechService {
 
   onUnsuccessfulAnswer() {
     annyang.pause();
+    console.log("IS LISTENING: " + annyang.isListening());
     this.twinkly.playFailureMovie();
     this.currentGameState = GAMESTATE.ENDING;
     this.countdownAudio.pause;
