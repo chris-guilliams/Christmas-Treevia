@@ -86,8 +86,9 @@ export class SpeechService {
   private setupSpeechSynthesis() {
     var availableVoices = window.speechSynthesis.getVoices();
 
-    console.log("Available Voices");
-    console.log(availableVoices);
+    //Uncomment to log available voices for device
+    // console.log("Available Voices");
+    // console.log(availableVoices);
 
     var selectedVoice = availableVoices.filter(function(voice) { return voice.name == 'Google US English'; })[0];
 

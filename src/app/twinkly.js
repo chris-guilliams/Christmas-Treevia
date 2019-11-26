@@ -26,9 +26,10 @@ export class TwinklyLights {
 				})	
 				.then(resolve)
 				.catch(error => {
-					console.log("ERROR OCCURED");
-					console.log(error);
-					reject(error);
+					// console.log("ERROR OCCURED");
+					// console.log(error);
+					console.log('Twinkly cannot be reached for some reason...')
+					//reject(error);
 				});
 		})
 	}
