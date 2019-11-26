@@ -30,7 +30,6 @@ export class SpeechService {
   currentQuestion = new Question("", [""], [""]);
   currentQuestionNumber = 0;
   soundEffectAudioVolume = 0.5;
-  musicAudioVolume = 0.05;
   speechVolume = 0.5;
   musicAudio;
   countdownAudio;
@@ -154,7 +153,7 @@ export class SpeechService {
       annyang.resume();
       console.log("IS LISTENING: " + annyang.isListening());
       this.countdownAudio = new Audio('/assets/audio/jeopardy_ten_second_timer.mp3');
-      this.countdownAudio.volume = 0.25;
+      this.countdownAudio.volume = 0.2;
 
       this.countdownAudio.onended = () => {
         this.onUnsuccessfulAnswer();
@@ -170,7 +169,7 @@ export class SpeechService {
       this.gameInProgress = false;
       this.currentQuestionNumber = 0;
       this.currentGameState = GAMESTATE.IDLE;
-      this.musicAudio.pause();
+      this.fadeMusicOut();
       this.abort();
     });
   }
@@ -236,7 +235,7 @@ export class SpeechService {
       this.speakWithCallback('I am sorry but that is incorrect. The correct answer is ' + this.currentQuestion.answers[0], () => {
         this.speakWithCallback('Better luck next time and thank you for playing and have a merry Christmas', () => {
           this.currentQuestionNumber = 0;
-          this.musicAudio.pause();
+          this.fadeMusicOut();
           this.gameInProgress = false;
           this.currentGameState == GAMESTATE.IDLE;
           this.abort();
@@ -245,15 +244,22 @@ export class SpeechService {
     });
   }
 
-  // private fadeVolOut(newPercent){
-  //   if(newPercent > 0){
-  //   setVolume(newPercent);
-  //   this.musicAudio.volume
-  //   setTimeout('fadeVolIn(' + (newPercent + 1) + ');', 50);
-  //   }
-
-  //   this.musicAudio.pause();
-  // }
+  private fadeMusicOut(){
+    if(this.musicAudio.volume > 0) {
+      var newVolume = this.musicAudio.volume - 0.03;
+      if (newVolume >= 0) {
+        this.musicAudio.volume = newVolume;
+      } else {
+        this.musicAudio.volume = 0;
+      }
+      setTimeout(() => {
+        this.fadeMusicOut();
+        console.log('FADING');
+      }, 500);
+    } else {
+      this.musicAudio.pause();
+    }
+  }
 
   init() {
     const commands = {
