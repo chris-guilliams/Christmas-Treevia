@@ -154,6 +154,19 @@ export class TwinklyLights {
 
 	}
 	playQuestionMovie() {
-		
+		// const pattern = require('./fill.js').generateRandomColorJSON(this, this.getRandomInt(244), this.getRandomInt(244), this.getRandomInt(244));
+
+		// this.newMovieUpload({
+		// 	frames: pattern,
+		// 	delay: 250
+		// });
+		this.setMode('off');
+		this.setMode('rt');
+	}
+
+	getRandomInt(max) {
+		var x = Math.floor(Math.random() * Math.floor(max));
+		console.log(x)
+		return x;
 	}
 }

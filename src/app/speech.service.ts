@@ -48,7 +48,7 @@ export class SpeechService {
       console.log(phrase);
       if (phrase.type === 'about') {
         this.speakWithCallback('Modeah provides technology consulting to help healthcare marketers thrive in the face of change and has been serving the Blacksburg area since 2006. They are also the creators me, your trivia guide. For more information visit modeah.com', () => {
-          annyang.start();
+          //annyang.start({ continuous: true });
         });
       } else if (phrase.type === 'quit') {
 
@@ -58,20 +58,24 @@ export class SpeechService {
 
   private setupQuestions() {
     //SETUP EASY QUESITONS
+    this.easyQuestions.push(new Question("What do naughty kids get for christmas?", ["coal", "cole"], []));
     this.easyQuestions.push(new Question("What is the name of the jolly red man?", ["santa", "santa clause", "santa claws", "saint nicholas", "Chris Kringle", "Kris Kringle"], ["claws", "saint", "nicholas", "chris", "kris"]));
     this.easyQuestions.push(new Question("What should little children leave out for Santa on Christmas Eve?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
-    this.mediumQuestions.push(new Question("Where is Santas workshop located", ["North Pole"], ["North", "Pole"]));
+    this.easyQuestions.push(new Question("Where is Santas workshop located", ["North Pole"], ["North", "Pole"]));
 
     //SETUP MEDIUM QUESITONS
     this.mediumQuestions.push(new Question("Why is life unfair?", ["milk and cookies", "cookies and milk", "milk", "cookies"], ["and"]));
 
     //SETUP HARD QUESITONS
     this.hardQuestions.push(new Question("What year was the town of Blacksburg founded?", ["1798", "the year 1798", "the year of 1798"], ["of", "of the", "the year"]))
-
+    this.hardQuestions.push(new Question("Which country did eggnog come from?", ["England"], []))
+    this.hardQuestions.push(new Question("Which one of Santa’s reindeer has the same name as another holiday mascot?", ["Cupid"], []))
+    this.hardQuestions.push(new Question("What is the tallest building on Virginia Tech campus?", ["Slusher Tower", "Slusher Hall", "Slusher"], ["Tower"]))
   }
 
   // private handleAnswer(answer) {
-  //   if (this.currentQuestion.isCorrect(answer)) {
+  //   if (this.currentQuestion.isCorrect(answer)) {start
+
   //     annyang.pause();
   //     this.countdownAudio.pause();
   //     this.onSuccessfulAnswer();
@@ -111,19 +115,23 @@ export class SpeechService {
       this.currentGameState = GAMESTATE.INTRO;
       this.setupSpeechSynthesis();
       this.gameInProgress = true;
+      annyang.start({ continuous: true });
+      annyang.pause();
 
       this.loadQuestions();
       this.musicAudio = new Audio('/assets/audio/christmas_song.mp3');
-      this.musicAudio.volume = 0.1;
+      this.musicAudio.volume = 0.2;
       this.musicAudio.play();
 
-      this.startQuestion(this.gameQuestions[this.currentQuestionNumber], this.currentQuestionNumber);
+      // this.startQuestion(this.gameQuestions[this.currentQuestionNumber], this.currentQuestionNumber);
 
-      // setTimeout(() => {
-      //   this.speakWithCallback('Welcome to the Modeah Trivia Tree ... where you will be challenged to answer Blacksburg and Christmas trivia questions ... Say one of the commands below or start.', () => {
-      //     annyang.start();
-      //   });
-      // }, 2500);
+      setTimeout(() => {
+        this.speakWithCallback('Welcome to the Modeah Treevia ... where you will be challenged to answer Blacksburg and Christmas trivia questions.', () => {
+          this.speakWithCallback('You will be given a total of ' + this.totalQuestionsToServe + ' questions of increasing difficulty. Good luck. ... ...', () => {
+            this.startQuestion(this.gameQuestions[this.currentQuestionNumber], this.currentQuestionNumber);
+          });
+        });
+      }, 2500);
     }
   }
 
@@ -133,11 +141,15 @@ export class SpeechService {
       return;
     }
 
+    this.twinkly.playQuestionMovie();
     this.currentGameState = GAMESTATE.QUESTION;
     this.currentQuestion = question;
     this.currentQuestionNumber++;
 
+    console.log("IS LISTENING: " + annyang.isListening());
     this.speakWithCallback("Here is Question number " + this.currentQuestionNumber + ' ... ... ... ... ... ' + question.questionString, () => {
+      
+      annyang.resume();
       this.countdownAudio = new Audio('/assets/audio/jeopardy_ten_second_timer.mp3');
       this.countdownAudio.volume = 0.25;
 
@@ -147,16 +159,16 @@ export class SpeechService {
 
       this.musicAudio.pause();
       this.countdownAudio.play();
-
-      annyang.start();
     });
   }
 
   endGameOnSuccess() {
     this.speakWithCallback('Congratulations!!! You just got all ' + this.totalQuestionsToServe + ' questions correct! You are a trivia god among gods! Have a merry Christmas', () => {
       this.gameInProgress = false;
+      this.currentQuestionNumber = 0;
       this.currentGameState = GAMESTATE.IDLE;
       this.musicAudio.pause();
+      this.abort();
     });
   }
 
@@ -216,11 +228,12 @@ export class SpeechService {
     this.countdownAudio.pause;
     this.musicAudio.play();
     this.playSoundWithCallback('/assets/audio/incorrect.mp3', 0.5, () => {
-      this.speakWithCallback('I am sorry, but your time is up. Thank you for playing and have a merry Christmas', () => {
+      this.speakWithCallback('I am sorry, but your time is up. Better luck next time and thank you for playing. Have a merry Christmas', () => {
         this.currentQuestionNumber = 0;
         this.musicAudio.pause();
         this.gameInProgress = false;
         this.currentGameState == GAMESTATE.IDLE;
+        this.abort();
       });
     });
   }
@@ -237,21 +250,6 @@ export class SpeechService {
 
   init() {
     const commands = {
-      'start game': (start) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'start'});
-        });
-      },
-      'start': (start) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'start'});
-        });
-      },
-      'begin': (start) => {
-        this.zone.run(() => {
-          this.words$.next({type: 'start'});
-        });
-      },
       'lets go': (start) => {
         this.zone.run(() => {
           this.words$.next({type: 'start'});
@@ -273,6 +271,17 @@ export class SpeechService {
     // Log anything the user says and what speech recognition thinks it might be
     annyang.addCallback('result', (userSaid) => {
       console.log('User may have said:', userSaid);
+      // if (this.currentGameState == GAMESTATE.INTRO && this.textMatchesIntroCase(userSaid)) {
+
+      // } else 
+      if (this.currentGameState == GAMESTATE.QUESTION && this.textMatchesAnswerCase(userSaid)) {
+        this.onSuccessfulAnswer();
+      } else {
+        this._handleError(
+          'no match',
+          'Spoken command not recognized. Say "noun [word]", "verb [word]", OR "adjective [word]".',
+          { results: userSaid });
+      }
     });
     annyang.addCallback('errorNetwork', (err) => {
       this._handleError('network', 'A network error occurred.', err);
@@ -283,20 +292,7 @@ export class SpeechService {
     annyang.addCallback('errorPermissionDenied', (err) => {
       this._handleError('denied', 'User denied microphone permissions.', err);
     });
-    annyang.addCallback('resultNoMatch', (userSaid) => {
-      if (this.currentGameState == GAMESTATE.INTRO && this.textMatchesIntroCase(userSaid)) {
-        this.speakWithCallback('You will be given a total of ' + this.totalQuestionsToServe + ' questions of increasing difficulty. Good luck. ... ...', () => {
-          this.startQuestion(this.gameQuestions[this.currentQuestionNumber], this.currentQuestionNumber);
-        });
-      } else if (this.currentGameState == GAMESTATE.QUESTION && this.textMatchesAnswerCase(userSaid)) {
-        this.onSuccessfulAnswer();
-      } else {
-        this._handleError(
-          'no match',
-          'Spoken command not recognized. Say "noun [word]", "verb [word]", OR "adjective [word]".',
-          { results: userSaid });
-      }
-    });
+    annyang.addCallback('resultNoMatch', (userSaid) => {});
   }
 
   private textMatchesIntroCase(possibleUserMatches) {
@@ -306,7 +302,7 @@ export class SpeechService {
       if (!correct) {
         var correctedText = text.toLowerCase();
   
-        if (correctedText.includes("begin") || correctedText.includes("start")) {
+        if (correctedText.includes("play") || correctedText.includes("start") || correctedText.includes("begin")) {
           correct = true;
           return;
         }

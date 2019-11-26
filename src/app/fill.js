@@ -29,5 +29,15 @@ module.exports = {
 		}
 
 		return frames;
+	},
+	generateRandomColorJSON: (twinkly, red, green, blue) => {
+		const frames = [];
+		const totalLights = 225;
+
+		for (let x = 0; x < totalLights; x++) {
+			frames.push(twinkly.generateFullFrame({r: red, g: green, b: blue}, 50));
+		}
+
+		return frames;
 	}
 }
