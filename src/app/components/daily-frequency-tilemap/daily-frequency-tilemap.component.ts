@@ -1,13 +1,15 @@
-import { Component, OnInit, Input, OnChanges, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { Timestamp } from '@google-cloud/firestore';
+// import * as d3 from 'd3';
 @Component({
   selector: 'app-daily-frequency-tilemap',
+  encapsulation: ViewEncapsulation.None,
   templateUrl: './daily-frequency-tilemap.component.html',
   styleUrls: ['./daily-frequency-tilemap.component.scss']
 })
 export class DailyFrequencyTilemapComponent implements OnInit, OnChanges {
 
-  @ViewChild('frequency-tilemap')
+  @ViewChild('frequency_tilemap')
   private chartContainer: ElementRef;
 
   @Input() timestamps: {when: Timestamp}[];
@@ -22,8 +24,28 @@ export class DailyFrequencyTilemapComponent implements OnInit, OnChanges {
     this.createChart();
   }
 
+  formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds - (hours * 3600)) / 60);
+    let time = '';
+    if (hours > 0) {
+      time += hours === 1 ? '1 hour ' : hours + ' hours ';
+    }
+    if (minutes > 0) {
+      time += minutes === 1 ? '1 minute' : minutes + ' minutes';
+    }
+    if (hours === 0 && minutes === 0) {
+      time = Math.round(seconds) + ' seconds';
+    }
+    console.log(time);
+    return time;
+  }
+
   private createChart(): void {
     console.log(this.timestamps);
+    for (const timestamp of this.timestamps) {
+      console.log(timestamp.when.toDate());
+    }
     // d3.select('svg').remove();
 
     // const element = this.chartContainer.nativeElement;
