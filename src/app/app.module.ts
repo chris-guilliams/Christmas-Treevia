@@ -12,13 +12,15 @@ import { AngularFirestoreModule, AngularFirestore } from '@angular/fire/firestor
 import { environment } from '../environments/environment';
 import { TimerService } from './services/timer.service';
 import { TimerComponent } from './timer/timer.component';
+import { DailyFrequencyTilemapComponent } from './components/daily-frequency-tilemap/daily-frequency-tilemap.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ListenComponent,
     QuestionComponent,
-    TimerComponent
+    TimerComponent,
+    DailyFrequencyTilemapComponent
   ],
   imports: [
     BrowserModule,
