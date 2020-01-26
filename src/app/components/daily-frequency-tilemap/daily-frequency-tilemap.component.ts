@@ -11,7 +11,7 @@ export class DailyFrequencyTilemapComponent implements OnInit, OnChanges, AfterV
 
   constructor() { }
 
-  @ViewChild('frequency_tilemap')
+  @ViewChild('frequency_tilemap', { static: true })
   private chartContainer: ElementRef;
 
   @Input() timestamps: {when: Timestamp}[];

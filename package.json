@@ -8,20 +8,20 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "deploy": "ng build && firebase deploy"
+    "deploy": "ng build --prod && firebase deploy"
   },
   "private": true,
   "dependencies": {
-    "@angular-devkit/build-angular": "^0.13.9",
-    "@angular/animations": "^7.2.16",
-    "@angular/common": "^7.2.16",
-    "@angular/compiler": "^7.2.16",
-    "@angular/core": "^7.2.16",
+    "@angular-devkit/build-angular": "~0.803.23",
+    "@angular/animations": "^8.2.14",
+    "@angular/common": "^8.2.14",
+    "@angular/compiler": "^8.2.14",
+    "@angular/core": "^8.2.14",
     "@angular/fire": "^5.3.0",
-    "@angular/forms": "^7.2.16",
-    "@angular/platform-browser": "^7.2.16",
-    "@angular/platform-browser-dynamic": "^7.2.16",
-    "@angular/router": "^7.2.16",
+    "@angular/forms": "^8.2.14",
+    "@angular/platform-browser": "^8.2.14",
+    "@angular/platform-browser-dynamic": "^8.2.14",
+    "@angular/router": "^8.2.14",
     "@google-cloud/firestore": "^3.4.1",
     "@types/jasmine": "~2.8.8",
     "@types/jasminewd2": "~2.0.3",
@@ -37,17 +37,17 @@
     "motion-css-animation": "^1.0.0",
     "npm": "^6.13.6",
     "p5": "^0.10.2",
-    "rxjs": "~6.3.3",
+    "rxjs": "~6.5.4",
     "tslib": "^1.9.0",
     "twinkly-api": "^0.2.1",
     "web3": "^0.20.7",
-    "zone.js": "~0.8.26"
+    "zone.js": "~0.9.1"
   },
   "devDependencies": {
-    "@angular/cli": "~7.3.6",
-    "@angular/compiler-cli": "^7.2.16",
-    "@angular/language-service": "^7.2.16",
-    "codelyzer": "~4.5.0",
+    "@angular/cli": "~8.3.23",
+    "@angular/compiler-cli": "^8.2.14",
+    "@angular/language-service": "^8.2.14",
+    "codelyzer": "^5.0.1",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~4.0.0",
@@ -58,6 +58,6 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
-    "typescript": "~3.2.2"
+    "typescript": "~3.5.3"
   }
 }

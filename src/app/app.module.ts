@@ -26,7 +26,8 @@ import { DailyFrequencyTilemapComponent } from './components/daily-frequency-til
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    AngularFireModule.initializeApp(environment.firebase)
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule,
   ],
   providers: [
     SpeechService,
