@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, ViewChild, ElementRef, ViewEncapsulation, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { Timestamp } from '@google-cloud/firestore';
 import * as d3 from 'd3';
 import { AngularFirestore } from '@angular/fire/firestore';
@@ -8,7 +8,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
   templateUrl: './daily-frequency-tilemap.component.html',
   styleUrls: ['./daily-frequency-tilemap.component.scss']
 })
-export class DailyFrequencyTilemapComponent implements OnInit, OnChanges, AfterViewInit {
+export class DailyFrequencyTilemapComponent implements OnInit {
 
   constructor(private db: AngularFirestore) { }
 
@@ -62,12 +62,6 @@ export class DailyFrequencyTilemapComponent implements OnInit, OnChanges, AfterV
 
   ngOnInit() {
     this.startGame();
-  }
-
-  ngAfterViewInit() {
-  }
-
-  ngOnChanges() {
   }
 
   startGame() {

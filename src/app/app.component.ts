@@ -18,6 +18,7 @@ export class AppComponent implements OnInit, OnDestroy, OnChanges {
   questions: Question[] = [];
   hasLoaded = false;
   timestamps: Observable<any>;
+  window = window;
 
   constructor(public speech: SpeechService, private http: HttpClient, private db: AngularFirestore) {
   }
