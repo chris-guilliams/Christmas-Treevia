@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, OnChanges, ViewChild, ElementRef, ViewEncapsulation, AfterViewInit } from '@angular/core';
 import { Timestamp } from '@google-cloud/firestore';
 import * as d3 from 'd3';
+import { AngularFirestore } from '@angular/fire/firestore';
 @Component({
   selector: 'app-daily-frequency-tilemap',
   encapsulation: ViewEncapsulation.None,
@@ -9,7 +10,7 @@ import * as d3 from 'd3';
 })
 export class DailyFrequencyTilemapComponent implements OnInit, OnChanges, AfterViewInit {
 
-  constructor() { }
+  constructor(private db: AngularFirestore) { }
 
   @ViewChild('frequency_tilemap', { static: true })
   private chartContainer: ElementRef;
@@ -59,19 +60,26 @@ export class DailyFrequencyTilemapComponent implements OnInit, OnChanges, AfterV
   color;
   tooltip;
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.startGame();
+  }
 
   ngAfterViewInit() {
   }
 
   ngOnChanges() {
-    if (!this.timestamps) { return; }
-    this.createChart();
-    this.createTooltip();
-    this.appendSVG();
-    this.buildDayLabels();
-    this.buildDays();
-    this.buildFunctions();
+  }
+
+  startGame() {
+    this.db.collection('triviaPlays').valueChanges().subscribe((change: {when: Timestamp}[]) => {
+      this.timestamps = change;
+      this.createChart();
+      this.createTooltip();
+      this.appendSVG();
+      this.buildDayLabels();
+      this.buildDays();
+      this.buildFunctions();
+    });
   }
 
   private createChart() {

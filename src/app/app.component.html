@@ -1,17 +1,4 @@
 <app-listen *ngIf="speech.speechSupported"></app-listen>
 <button (click)='startGame()'>update db</button>
 <h1 *ngIf=!speech.speechSupported>Speech recognition is not supported on your device or browser</h1>
-<ul>
-	<li *ngFor="let phrase of recievedAnswers">{{ phrase }}</li>
-</ul>
-<app-timer></app-timer>
 <router-outlet></router-outlet>
-
-
-<div *ngIf="questions" class="questions">
-	<div *ngFor="let question of questions">
-		<app-question [question]="question.questionString" [correctAnswer]="question.answers"></app-question>
-	</div>
-</div>
-
-<app-daily-frequency-tilemap [timestamps]="timestamps | async"></app-daily-frequency-tilemap>
