@@ -1,0 +1,93 @@
+rect.bordered {
+    stroke: #E6E6E6;
+    stroke-width:2px;   
+}
+
+text.mono {
+    font-size: 24pt;
+    font-family: Consolas, courier;
+    fill: #aaa;
+}
+
+text.axis-workweek {
+    fill: #000;
+    font-size: 24px;
+}
+
+text.axis-worktime {
+    fill: #000;
+}
+
+.cell {
+    transition: transform .2s;
+}
+
+.cell:hover {
+    transform: translate(-2px, 2px);
+}
+
+.chart {
+    height: 600px;
+    width: 800px;
+}
+
+@keyframes popout {
+    from{transform:scale(0)}
+    80%{transform:scale(1.2)}
+    to{transform:scale(1)}
+}
+@-webkit-keyframes popout {
+    from{-webkit-transform:scale(0)}
+    80%{-webkit-transform:scale(1.2)}
+    to{-webkit-transform:scale(1)}
+}
+
+div.tooltip {	
+    position: absolute;			
+    text-align: center;		
+    font-family: 'Titillium Web', sans-serif;	
+    width: fit-content;					
+    height: 60px;	
+    width: 120px;				
+    padding: 5px;	
+    font-weight: bold;			
+    font: 18px;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
+
+.day-chart {
+    height: 600px;
+    width: 450px;
+    position: absolute;
+    overflow: scroll;
+    top: 0;
+    left: 800px;
+    
+    .tile {
+        
+        height: 250px;
+        width: 440px;
+        margin-top: 25px;
+        text-align: center;
+        border-radius: 10px;
+        background: #f1f7fd;
+        box-shadow: rgb(215, 230, 245) 10px -10px;
+        font-size: 26px;
+        color: black;
+        opacity: 1;
+        transition: opacity 0.3s;
+
+        &.hidden {
+            opacity: 0;
+        }
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
