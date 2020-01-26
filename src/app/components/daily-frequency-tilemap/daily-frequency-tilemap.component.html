@@ -1,6 +1,6 @@
 <section class="container">
     <div #frequency_tilemap id="chart" class="animation fade-in-right"></div>
-    <div class="day-chart"  (wheel)="myHeavyFunction($event)">
+    <div class="day-chart">
         <ng-container *ngFor="let day of objectKeys(dayCounts); index as i">
             <div class="tile">
                 {{ day }}
