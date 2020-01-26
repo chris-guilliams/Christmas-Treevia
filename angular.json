@@ -27,7 +27,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/motion-css-animation/motion.min.css"
             ],
             "scripts": [
               "./node_modules/p5/lib/p5.min.js",   
