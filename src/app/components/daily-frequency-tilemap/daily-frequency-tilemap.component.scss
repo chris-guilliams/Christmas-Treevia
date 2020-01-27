@@ -26,20 +26,9 @@ text.axis-worktime {
     transform: translate(-2px, 2px);
 }
 
-.chart {
-    height: 600px;
-    width: 800px;
-}
-
-@keyframes popout {
-    from{transform:scale(0)}
-    80%{transform:scale(1.2)}
-    to{transform:scale(1)}
-}
-@-webkit-keyframes popout {
-    from{-webkit-transform:scale(0)}
-    80%{-webkit-transform:scale(1.2)}
-    to{-webkit-transform:scale(1)}
+#chart {
+    width: fit-content;
+    margin: 0 auto;
 }
 
 div.tooltip {	
@@ -59,18 +48,16 @@ div.tooltip {
 }
 
 .day-chart {
-    height: 600px;
-    width: 450px;
-    position: absolute;
+    display: flex;
+    flex-direction: row;
+    height: 600px;  
+    width: 100vw;
     overflow: scroll;
-    top: 0;
-    left: 800px;
     
     .tile {
-        
         height: 250px;
-        width: 440px;
-        margin-top: 25px;
+        min-width: 440px;
+        margin: 25px 10px;
         text-align: center;
         border-radius: 10px;
         background: #f1f7fd;
@@ -87,7 +74,9 @@ div.tooltip {
 }
 
 .container {
+    width: 100vw;
     display: flex;
     flex-direction: column;
     margin: 0;
+    padding: 0;
 }

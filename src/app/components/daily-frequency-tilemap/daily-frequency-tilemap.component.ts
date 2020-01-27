@@ -12,9 +12,6 @@ export class DailyFrequencyTilemapComponent implements OnInit {
 
   constructor(private db: AngularFirestore) { }
 
-  @ViewChild('frequency_tilemap', { static: true })
-  private chartContainer: ElementRef;
-
   @Input() timestamps: {when: Timestamp}[];
 
   dates: Date[];
@@ -24,8 +21,8 @@ export class DailyFrequencyTilemapComponent implements OnInit {
     }
   } = {};
   currentDate: { count: number, date: Date } = { count: 0, date: new Date() };
-  margin = { top: 10, right: 10, bottom: 10, left: 50 };
-  width = 800 - this.margin.left - this.margin.right;
+  margin = { top: 10, right: 10, bottom: 10, left: 40 };
+  width = 720 - this.margin.left - this.margin.right;
   height = 550 - this.margin.top - this.margin.bottom;
   gridSize = Math.floor(this.width / 24);
   cellSize = 100;
@@ -35,12 +32,11 @@ export class DailyFrequencyTilemapComponent implements OnInit {
   legendElementWidth = this.gridSize * 2;
   buckets = 9;
   days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  currentTileIndex = 0;
   weeks = [''];
   times = ['1a', '2a', '3a', '4a', '5a', '6a', '7a', '8a', '9a',
     '10a', '11a', '12a', '1p', '2p', '3p', '4p', '5p', '6p', '7p', '8p', '9p', '10p', '11p', '12p'];
 
-  maxValue = 62;
+  maxValue = 62; // max frequency per day from dataset
   minValue = 0;
   colorFn = d3.scaleSequential(d3.interpolateBlues).domain([this.minValue, this.maxValue]);
 
@@ -48,7 +44,6 @@ export class DailyFrequencyTilemapComponent implements OnInit {
   categories = [...Array(this.categoriesCount)].map((_, i) => {
     const upperBound = this.maxValue / this.categoriesCount * (i + 1);
     const lowerBound = this.maxValue / this.categoriesCount * i;
-
     return {
       upperBound,
       lowerBound,
@@ -72,7 +67,7 @@ export class DailyFrequencyTilemapComponent implements OnInit {
       this.appendSVG();
       this.buildDayLabels();
       this.buildDays();
-      this.buildFunctions();
+      console.log(this.dayCounts);
     });
   }
 
@@ -102,15 +97,29 @@ export class DailyFrequencyTilemapComponent implements OnInit {
       .append('g')
       .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
     this.svg.on('mousemove', (d) => {
-      d3.select('div.tooltip').html(this.currentDate.date.toDateString() + '<br/>plays: '  + this.currentDate.count)
-        .style('left', (d3.event.pageX) + 0 + 'px')
-        .style('top', (d3.event.pageY - 40) + 'px')
-        .style('font-family', '\'Titillium Web\', sans-serif');;
+      this.updateTooltip(this.currentDate.date, this.currentDate.count);
+    });
+    this.svg.on('click', (d) => {
+      this.scrollDayIntoView(this.currentDate.date);
     });
   }
 
+  updateTooltip(day: Date, plays: number) {
+    const currentDateString = (day.getMonth() + 1) + '/' + day.getDate() + '/' + day.getFullYear();
+    d3.select('div.tooltip').html(currentDateString + '<br/>plays: '  + plays)
+      .style('left', (d3.event.pageX) + 5 + 'px')
+      .style('top', (d3.event.pageY - 65) + 'px')
+      .style('font-family', '\'Titillium Web\', sans-serif');
+  }
+
+  scrollDayIntoView(day: Date) {
+    const dayChartId = day.toDateString().split(' ').join('-');
+    this.getPlaysForDay(day);
+    (document.getElementById(dayChartId) as HTMLElement).scrollIntoView({behavior: 'smooth', block: 'end', inline: 'center'});
+  }
+
   buildDayLabels() {
-    const dayLabels = this.svg.selectAll('.dayLabel')
+    this.svg.selectAll('.dayLabel')
       .data(this.days)
       .enter()
       .append('g')
@@ -129,17 +138,14 @@ export class DailyFrequencyTilemapComponent implements OnInit {
   }
 
   buildTimeLabels() {
-    const timeLabels = this.svg.selectAll('.timeLabel')
+    this.svg.selectAll('.timeLabel')
       .data(Object.keys(this.dayCounts))
       .enter().append('text')
         .text(d => d)
         .attr('x', -100)
         .attr('y', (d, i) => i * this.gridSize)
         .style('text-anchor', 'middle')
-        .attr('transform', () => 'translate(' + this.gridSize / 2 + ', -6)')
-        .attr('class', (d, i) => {
-          return ((i >= 7 && i <= 16) ? 'timeLabel mono axis axis-worktime' : 'timeLabel mono axis');
-        });
+        .attr('transform', () => 'translate(' + this.gridSize / 2 + ', -6)');
   }
 
   buildDays() {
@@ -185,38 +191,7 @@ export class DailyFrequencyTilemapComponent implements OnInit {
       .style('opacity', 0);
   }
 
-  scrollHandler(event) {
-    this.debounce(this.handleScroll, 200);
-  }
-
-  handleScroll(event) {
-
-  }
-
-  debounce (func, interval) {
-    let timeout;
-    return function() {
-      const context = this;
-      const args = arguments;
-      const later = () => {
-        timeout = null;
-        func.apply(context, args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, interval || 200);
-    };
-  }
-
-  buildFunctions() {
-    this.myHeavyFunction = this.debounce(function() {
-      // do heavy things
-      const scrollForward = arguments[0].deltaY < 0 ? true : false;
-      if (scrollForward && this.currentTileIndex > 0) {
-        this.currentTileIndex--;
-      } else if (scrollForward && this.currentTileIndex < 26) {
-        this.currentTileIndex++;
-      }
-      console.log('current tile index:', this.currentTileIndex);
-    }, 25);
+  getPlaysForDay(day: Date): Date[] {
+    return this.dates.filter(date => date.toDateString() === day.toDateString());
   }
 }
