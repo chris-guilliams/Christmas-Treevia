@@ -73,8 +73,6 @@ export class DailyFrequencyTilemapComponent implements OnInit {
 
   private createChart() {
     this.dates = this.timestamps.map(timestamp => timestamp.when.toDate());
-    this.dates.push(new Date('Sat Dec 07 2019'));
-    this.dates.push(new Date('Sat Dec 03 2019'));
     this.dates = this.dates.sort((a, b) => {
       return a.valueOf() - b.valueOf();
     });
@@ -88,6 +86,14 @@ export class DailyFrequencyTilemapComponent implements OnInit {
         };
       }
     }
+    this.dayCounts[new Date('Sat Dec 07 2019').toDateString()] = {
+      count: 0,
+      date: new Date('Sat Dec 07 2019')
+    };
+    this.dayCounts[new Date('Sat Dec 03 2019').toDateString()] = {
+      count: 0,
+      date: new Date('Sat Dec 03 2019')
+    };
   }
 
   appendSVG() {
