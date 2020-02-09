@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, ViewEncapsulation, AfterViewInit, Renderer, Renderer2 } from '@angular/core';
 import { Timestamp } from '@google-cloud/firestore';
 import * as d3 from 'd3';
 import { AngularFirestore } from '@angular/fire/firestore';
@@ -8,9 +8,9 @@ import { AngularFirestore } from '@angular/fire/firestore';
   templateUrl: './daily-frequency-tilemap.component.html',
   styleUrls: ['./daily-frequency-tilemap.component.scss']
 })
-export class DailyFrequencyTilemapComponent implements OnInit {
+export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
 
-  constructor(private db: AngularFirestore) { }
+  constructor(private db: AngularFirestore, private renderer: Renderer2, private elem: ElementRef) { }
 
   @Input() timestamps: {when: Timestamp}[];
 
@@ -57,6 +57,11 @@ export class DailyFrequencyTilemapComponent implements OnInit {
 
   ngOnInit() {
     this.startGame();
+  }
+
+  ngAfterViewInit() {
+    this.addXAxesToCards();
+    this.addYAxesToCards();
   }
 
   startGame() {
@@ -199,5 +204,75 @@ export class DailyFrequencyTilemapComponent implements OnInit {
 
   getPlaysForDay(day: Date): Date[] {
     return this.dates.filter(date => date.toDateString() === day.toDateString());
+  }
+
+  addXAxisToCard(id: string) {
+    const width = 440;
+    const height = 250;
+    const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+
+    // Append SVG
+    const svg = d3.select('#' + id)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+    // Create scale
+    const scale = d3.scaleLinear()
+                  .domain([d3.min(data), d3.max(data)])
+                  .range([0, width - 40]);
+
+    // Add scales to axis
+    const xAxis = d3.axisBottom()
+                  .scale(scale)
+                  .ticks(24);
+
+    // Append group and insert axis
+    svg.append('g')
+      .call(xAxis)
+      .attr('transform', 'translate(30,' + (height - 80) + ')');
+  }
+
+  addXAxesToCards() {
+    const elArr = document.getElementsByClassName('day-card');
+    setTimeout(() => {
+      Array.prototype.forEach.call(elArr, (element) => {
+        this.addXAxisToCard(element.id);
+      });
+    }, 750);
+  }
+
+  addYAxisToCard(id: string) {
+    const width = 440;
+    const height = 250;
+    const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+
+    // Append SVG
+    const svg = d3.select('#' + id + ' svg')
+                .attr('width', width)
+                .attr('height', height);
+
+    // Create scale
+    const scale = d3.scaleLinear()
+                  .domain([d3.max(data), d3.min(data)])
+                  .range([0, 170]);
+
+    // Add scales to axis
+    const yAxis = d3.axisLeft()
+                  .scale(scale);
+
+    // Append group and insert axis
+    svg.append('g')
+      .call(yAxis)
+      .attr('transform', 'translate(30,0)');
+  }
+
+  addYAxesToCards() {
+    const elArr = document.getElementsByClassName('day-card');
+    setTimeout(() => {
+      Array.prototype.forEach.call(elArr, (element) => {
+        this.addYAxisToCard(element.id);
+      });
+    }, 750);
   }
 }

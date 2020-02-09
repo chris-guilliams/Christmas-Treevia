@@ -2,7 +2,7 @@
     <div #frequency_tilemap id="chart" class="animation fade-in-down"></div>
     <div class="day-chart animation fade-in-up">
         <ng-container *ngFor="let day of objectKeys(dayCounts); index as i">
-            <div class="tile" [id]="day.split(' ').join('-')">
+            <div class="day-card" [id]="day.split(' ').join('-')">
                 {{ day }}
             </div>
         </ng-container>
