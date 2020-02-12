@@ -62,6 +62,7 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.addXAxesToCards();
     this.addYAxesToCards();
+    this.addBarsToCards();
   }
 
   startGame() {
@@ -239,7 +240,7 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
       Array.prototype.forEach.call(elArr, (element) => {
         this.addXAxisToCard(element.id);
       });
-    }, 750);
+    }, 1500);
   }
 
   addYAxisToCard(id: string) {
@@ -273,6 +274,63 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
       Array.prototype.forEach.call(elArr, (element) => {
         this.addYAxisToCard(element.id);
       });
-    }, 750);
+    }, 1500);
+  }
+
+  addBarsToCard(id: string) {
+    const width = 440;
+    const height = 250;
+    const data = [
+      {hour: 0, count: 20},
+      {hour: 1, count: 20},
+      {hour: 2, count: 20},
+      {hour: 3, count: 20},
+      {hour: 4, count: 20},
+      {hour: 5, count: 20},
+      {hour: 6, count: 20},
+      {hour: 7, count: 20},
+      {hour: 8, count: 20},
+      {hour: 9, count: 20},
+      {hour: 10, count: 20},
+      {hour: 11, count: 20},
+      {hour: 12, count: 20},
+      {hour: 13, count: 20},
+      {hour: 14, count: 20},
+      {hour: 15, count: 20},
+      {hour: 16, count: 20},
+      {hour: 17, count: 20},
+      {hour: 18, count: 20},
+      {hour: 19, count: 20},
+      {hour: 20, count: 20},
+      {hour: 21, count: 20},
+      {hour: 22, count: 20},
+      {hour: 23, count: 20},
+    ];
+    const x = d3.scaleBand()
+      .range([0, width - 40])
+      .padding(0.2);
+    const y = d3.scaleLinear()
+      .domain([height, 0])
+      .range([0, 170]);
+    x.domain(data.map((d) => { return d.hour; }));
+    y.domain([0, d3.max(data, d => d.count)]);
+    const svg = d3.select('#' + id + ' svg');
+    svg.selectAll('bar')
+      .data(data)
+      .enter().append('rect')
+      .style('fill', 'steelblue')
+      .attr('x', (d) => { return (x(d.hour) + 40); })
+      .attr('width', x.bandwidth())
+      .attr('y', (d) => { return height - y(d.count); })
+      .attr('height', (d) => { return height - y(d.count); });
+  }
+
+  addBarsToCards() {
+    const elArr = document.getElementsByClassName('day-card');
+    setTimeout(() => {
+      Array.prototype.forEach.call(elArr, (element) => {
+        this.addBarsToCard(element.id);
+      });
+    }, 1500);
   }
 }
