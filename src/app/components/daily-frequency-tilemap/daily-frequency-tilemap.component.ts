@@ -13,7 +13,8 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
   constructor(private db: AngularFirestore, private renderer: Renderer2, private elem: ElementRef) { }
 
   @Input() timestamps: {when: Timestamp}[];
-
+  plays: Timestamp[];
+  playsByHour: { [key: string]: {hour: number, count: number}[]};
   dates: Date[];
   dayCounts: { [key: string]: {
       count: number,
@@ -51,6 +52,33 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
     };
   });
 
+  mockData = [
+    {hour: 0, count: 20},
+    {hour: 1, count: 20},
+    {hour: 2, count: 20},
+    {hour: 3, count: 20},
+    {hour: 4, count: 20},
+    {hour: 5, count: 20},
+    {hour: 6, count: 20},
+    {hour: 7, count: 20},
+    {hour: 8, count: 20},
+    {hour: 9, count: 20},
+    {hour: 10, count: 20},
+    {hour: 11, count: 20},
+    {hour: 12, count: 20},
+    {hour: 13, count: 7},
+    {hour: 14, count: 20},
+    {hour: 15, count: 20},
+    {hour: 16, count: 20},
+    {hour: 17, count: 20},
+    {hour: 18, count: 20},
+    {hour: 19, count: 20},
+    {hour: 20, count: 20},
+    {hour: 21, count: 20},
+    {hour: 22, count: 20},
+    {hour: 23, count: 20},
+  ];
+
   svg;
   color;
   tooltip;
@@ -68,12 +96,13 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
   startGame() {
     this.db.collection('triviaPlays').valueChanges().subscribe((change: {when: Timestamp}[]) => {
       this.timestamps = change;
+      this.plays =  this.timestamps.map((timestamp => timestamp.when));
+      this.playsByHour = this.sortPlaysByHour(this.plays);
       this.createChart();
       this.createTooltip();
       this.appendSVG();
       this.buildDayLabels();
       this.buildDays();
-      console.log(this.dayCounts);
     });
   }
 
@@ -219,19 +248,17 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
                 .attr('height', height);
 
     // Create scale
-    const scale = d3.scaleLinear()
-                  .domain([d3.min(data), d3.max(data)])
+    const scale = d3.scaleBand()
+                  .domain(data)
                   .range([0, width - 40]);
 
     // Add scales to axis
-    const xAxis = d3.axisBottom()
-                  .scale(scale)
-                  .ticks(24);
+    const xAxis = d3.axisBottom(scale).tickSizeOuter(0);
 
     // Append group and insert axis
     svg.append('g')
       .call(xAxis)
-      .attr('transform', 'translate(30,' + (height - 80) + ')');
+      .attr('transform', 'translate(22.25,' + (height - 80) + ')');
   }
 
   addXAxesToCards() {
@@ -246,7 +273,7 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
   addYAxisToCard(id: string) {
     const width = 440;
     const height = 250;
-    const data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+    const data = [40];
 
     // Append SVG
     const svg = d3.select('#' + id + ' svg')
@@ -255,7 +282,7 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
 
     // Create scale
     const scale = d3.scaleLinear()
-                  .domain([d3.max(data), d3.min(data)])
+                  .domain([d3.max(data), 0])
                   .range([0, 170]);
 
     // Add scales to axis
@@ -277,60 +304,54 @@ export class DailyFrequencyTilemapComponent implements OnInit, AfterViewInit {
     }, 1500);
   }
 
-  addBarsToCard(id: string) {
+  addBarsToCard(id: string, data: {hour: number, count: number}[]) {
     const width = 440;
-    const height = 250;
-    const data = [
-      {hour: 0, count: 20},
-      {hour: 1, count: 20},
-      {hour: 2, count: 20},
-      {hour: 3, count: 20},
-      {hour: 4, count: 20},
-      {hour: 5, count: 20},
-      {hour: 6, count: 20},
-      {hour: 7, count: 20},
-      {hour: 8, count: 20},
-      {hour: 9, count: 20},
-      {hour: 10, count: 20},
-      {hour: 11, count: 20},
-      {hour: 12, count: 20},
-      {hour: 13, count: 20},
-      {hour: 14, count: 20},
-      {hour: 15, count: 20},
-      {hour: 16, count: 20},
-      {hour: 17, count: 20},
-      {hour: 18, count: 20},
-      {hour: 19, count: 20},
-      {hour: 20, count: 20},
-      {hour: 21, count: 20},
-      {hour: 22, count: 20},
-      {hour: 23, count: 20},
-    ];
+    const height = 170;
     const x = d3.scaleBand()
       .range([0, width - 40])
       .padding(0.2);
     const y = d3.scaleLinear()
-      .domain([height, 0])
-      .range([0, 170]);
-    x.domain(data.map((d) => { return d.hour; }));
-    y.domain([0, d3.max(data, d => d.count)]);
+      .domain([0, 40])
+      .range([0, height]);
+    x.domain(data.map((d) =>  d.hour));
     const svg = d3.select('#' + id + ' svg');
     svg.selectAll('bar')
       .data(data)
       .enter().append('rect')
       .style('fill', 'steelblue')
-      .attr('x', (d) => { return (x(d.hour) + 40); })
+      .attr('x', (d) => (x(d.hour) + 30))
       .attr('width', x.bandwidth())
-      .attr('y', (d) => { return height - y(d.count); })
-      .attr('height', (d) => { return height - y(d.count); });
+      .attr('y', (d) => height - y(d.count))
+      .attr('height', (d) => y(d.count));
   }
 
   addBarsToCards() {
     const elArr = document.getElementsByClassName('day-card');
     setTimeout(() => {
       Array.prototype.forEach.call(elArr, (element) => {
-        this.addBarsToCard(element.id);
+        this.addBarsToCard(element.id, this.mockData);
       });
     }, 1500);
+  }
+
+  // getHourDataForCard(id: string): {hour: number, count: number}[] {
+
+  // }
+
+  sortPlaysByHour(plays: Timestamp[]): { [key: string]: { hour: number, count: number }[] } {
+    let playsSortedByHour: { [key: string]: { hour: number, count: number }[] } = {};
+    console.log(plays);
+    for ( const play of plays) {
+      console.log(play.toDate().toDateString());
+      const playDateString = play.toDate().toDateString();
+      const playHour = play.toDate().getHours();
+      if (playsSortedByHour[playDateString] && playsSortedByHour[playDateString].some(hourCount => hourCount.hour === playHour)) {
+        // playsSortedByHour[playDateString] = [{hour: play.toDate().getHours(), count: 1}];
+      } else {
+        playsSortedByHour[playDateString] = [{hour: play.toDate().getHours(), count: 1}];
+      }
+    }
+    console.log(playsSortedByHour);
+    return playsSortedByHour;
   }
 }
